@@ -24,8 +24,18 @@ RUN /usr/bin/code-server --install-extension arzg.intellij-theme
 RUN /usr/bin/code-server --install-extension ms-python.python
 RUN /usr/bin/code-server --install-extension tht13.python
 
-COPY ./docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
+#COPY ./docker-entrypoint.sh /
+#RUN chmod +x /docker-entrypoint.sh
 
 CMD ["--bind-addr", "0.0.0.0:8080", "--auth", "none"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+RUN apt install -y nginx ttyd
+RUN apt install -y curl
+RUN curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
+RUN mkdir /opt/filebrowser
+
+RUN rm -rf /etc/nginx/sites-enabled/default
+ADD ./NGINX /etc/nginx/sites-enabled/
+COPY ./docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
