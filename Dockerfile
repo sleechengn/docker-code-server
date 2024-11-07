@@ -39,3 +39,6 @@ RUN rm -rf /etc/nginx/sites-enabled/default
 ADD ./NGINX /etc/nginx/sites-enabled/
 COPY ./docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
+
+VOLUME /usr/local/lib/python3.11/dist-packages
+VOLUME /root
