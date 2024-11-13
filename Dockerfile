@@ -5,17 +5,23 @@ RUN apt update && apt remove -y python* && apt autoremove && apt autoclean && ap
 
 #install code-server online
 RUN wget https://github.com/coder/code-server/releases/download/v4.93.1/code-server_4.93.1_amd64.deb
-RUN dpkg -i ./code-server_4.93.1_amd64.deb
+RUN dpkg -i ./code-server_4.93.1_amd64.deb \
+	&& rm -rf ./code-server_4.93.1_amd64.deb
 
 #install openjdk21
 RUN wget https://download.java.net/openjdk/jdk21/ri/openjdk-21+35_linux-x64_bin.tar.gz
-RUN tar -zxvf ./openjdk-21+35_linux-x64_bin.tar.gz
+RUN tar -zxvf ./openjdk-21+35_linux-x64_bin.tar.gz \
+	&& rm -rf ./openjdk-21+35_linux-x64_bin.tar.gz
 ENV JAVA_HOME=/opt/cs/jdk-21
 RUN ln -s /opt/cs/jdk-21/bin/java /usr/bin/java
 RUN ln -s /opt/cs/jdk-21/bin/javac /usr/bin/javac
 
 #install python 3.11
-RUN apt install -y python3.11 python3-dev python3-pip
+RUN apt install -y python3.11 python3-dev python3-pip python3.11-venv \ 
+	&& rm -rf /usr/bin/python3 \
+	&& rm -rf /usr/bin/python \
+	&& ln -s $(which python3.11) /usr/bin/python \
+	&& ln -s $(which python3.11) /usr/bin/python3
 
 RUN /usr/bin/code-server --install-extension vscjava.vscode-java-pack
 RUN /usr/bin/code-server --install-extension gabrielbb.vscode-lombok
