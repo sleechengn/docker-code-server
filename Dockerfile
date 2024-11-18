@@ -17,11 +17,11 @@ RUN ln -s /opt/cs/jdk-21/bin/java /usr/bin/java
 RUN ln -s /opt/cs/jdk-21/bin/javac /usr/bin/javac
 
 #install python 3.11
-RUN apt install -y python3.11 python3-dev python3-pip python3.11-venv \ 
+RUN apt install -y python3.10 python3-dev python3-pip python3.10-venv \ 
 	&& rm -rf /usr/bin/python3 \
 	&& rm -rf /usr/bin/python \
-	&& ln -s $(which python3.11) /usr/bin/python \
-	&& ln -s $(which python3.11) /usr/bin/python3
+	&& ln -s $(which python3.10) /usr/bin/python \
+	&& ln -s $(which python3.10) /usr/bin/python3
 
 RUN /usr/bin/code-server --install-extension vscjava.vscode-java-pack
 RUN /usr/bin/code-server --install-extension gabrielbb.vscode-lombok
@@ -33,7 +33,7 @@ RUN /usr/bin/code-server --install-extension tht13.python
 #COPY ./docker-entrypoint.sh /
 #RUN chmod +x /docker-entrypoint.sh
 
-CMD ["--bind-addr", "0.0.0.0:8080", "--auth", "none"]
+CMD ["--bind-addr", "127.0.0.1:8080", "--auth", "none"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 RUN apt install -y nginx ttyd
@@ -46,5 +46,5 @@ ADD ./NGINX /etc/nginx/sites-enabled/
 COPY ./docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 
-VOLUME /usr/local/lib/python3.11/dist-packages
+VOLUME /usr/local/lib/python3.10/dist-packages
 VOLUME /root
