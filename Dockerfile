@@ -49,3 +49,4 @@ RUN chmod +x /docker-entrypoint.sh
 VOLUME /usr/local/lib/python3.10/dist-packages
 VOLUME /root
 VOLUME /opt
+VOLUME /workspace
