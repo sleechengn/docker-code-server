@@ -1,7 +1,8 @@
 FROM ubuntu:jammy
 RUN mkdir /opt/cs
 WORKDIR /opt/cs
-RUN apt update \
+RUN set -e \
+	&& apt update \
 	&& apt remove -y python* \
 	&& apt autoremove \
 	&& apt autoclean \
@@ -9,12 +10,14 @@ RUN apt update \
 	&& apt install -y wget git
 
 #install code-server online
-RUN wget https://github.com/coder/code-server/releases/download/v4.93.1/code-server_4.93.1_amd64.deb
-RUN dpkg -i ./code-server_4.93.1_amd64.deb \
+RUN set -e \
+	&& wget https://github.com/coder/code-server/releases/download/v4.93.1/code-server_4.93.1_amd64.deb \
+	&& dpkg -i ./code-server_4.93.1_amd64.deb \
 	&& rm -rf ./code-server_4.93.1_amd64.deb
 
 #install openjdk21
-RUN wget https://download.java.net/openjdk/jdk21/ri/openjdk-21+35_linux-x64_bin.tar.gz \
+RUN set -e \
+	&& wget https://download.java.net/openjdk/jdk21/ri/openjdk-21+35_linux-x64_bin.tar.gz \
 	&& tar -zxvf ./openjdk-21+35_linux-x64_bin.tar.gz \
 	&& rm -rf ./openjdk-21+35_linux-x64_bin.tar.gz \
 	&& ln -s /opt/cs/jdk-21/bin/java /usr/bin/java \
@@ -22,20 +25,23 @@ RUN wget https://download.java.net/openjdk/jdk21/ri/openjdk-21+35_linux-x64_bin.
 ENV JAVA_HOME=/opt/cs/jdk-21
 
 #install python 3.10
-RUN apt install -y python3.10 python3-dev python3-pip python3.10-venv \ 
+RUN set -e \
+	&& apt install -y python3.10 python3-dev python3-pip python3.10-venv \ 
 	&& rm -rf /usr/bin/python3 \
 	&& rm -rf /usr/bin/python \
 	&& ln -s $(which python3.10) /usr/bin/python \
 	&& ln -s $(which python3.10) /usr/bin/python3
 
-RUN /usr/bin/code-server --install-extension vscjava.vscode-java-pack \
+RUN set -e \
+	&& /usr/bin/code-server --install-extension vscjava.vscode-java-pack \
 	&& /usr/bin/code-server --install-extension gabrielbb.vscode-lombok \
 	&& /usr/bin/code-server --install-extension alphabotsec.vscode-eclipse-keybindings \
 	&& /usr/bin/code-server --install-extension arzg.intellij-theme \
 	&& /usr/bin/code-server --install-extension ms-python.python \
 	&& /usr/bin/code-server --install-extension tht13.python
 
-RUN apt install -y nginx ttyd \
+RUN set -e \
+	&& apt install -y nginx ttyd \
 	&& apt install -y curl \
 	&& curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash \
 	&& mkdir /opt/filebrowser \
