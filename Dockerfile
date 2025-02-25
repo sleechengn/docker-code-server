@@ -1,29 +1,43 @@
 FROM ubuntu:jammy
+
 RUN mkdir /opt/cs
 WORKDIR /opt/cs
+
+
 RUN set -e \
 	&& apt update \
 	&& apt remove -y python* \
 	&& apt autoremove \
 	&& apt autoclean \
 	&& apt autopurge \
-	&& apt install -y wget git
+	&& apt install -y wget git aria2
 
 #install code-server online
 RUN set -e \
-	&& wget https://github.com/coder/code-server/releases/download/v4.93.1/code-server_4.93.1_amd64.deb \
+	&& aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 "https://github.com/coder/code-server/releases/download/v4.93.1/code-server_4.93.1_amd64.deb" -o "code-server_4.93.1_amd64.deb" \
 	&& dpkg -i ./code-server_4.93.1_amd64.deb \
 	&& rm -rf ./code-server_4.93.1_amd64.deb
 
 #install openjdk21
-RUN set -e \
-	&& wget https://download.java.net/openjdk/jdk21/ri/openjdk-21+35_linux-x64_bin.tar.gz \
-	&& tar -zxvf ./openjdk-21+35_linux-x64_bin.tar.gz \
-	&& rm -rf ./openjdk-21+35_linux-x64_bin.tar.gz \
-	&& ln -s /opt/cs/jdk-21/bin/java /usr/bin/java \
-	&& ln -s /opt/cs/jdk-21/bin/javac /usr/bin/javac
-ENV JAVA_HOME=/opt/cs/jdk-21
+#RUN set -e \
+#	&& aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://download.java.net/openjdk/jdk21/ri/openjdk-21+35_linux-x64_bin.tar.gz \
+#	&& tar -zxvf ./openjdk-21+35_linux-x64_bin.tar.gz \
+#	&& rm -rf ./openjdk-21+35_linux-x64_bin.tar.gz \
+#	&& ln -s /opt/cs/jdk-21/bin/java /usr/bin/java \
+#	&& ln -s /opt/cs/jdk-21/bin/javac /usr/bin/javac
+#ENV JAVA_HOME=/opt/cs/jdk-21
 
+#install graalvm
+RUN set -e \
+	&& mkdir -p /opt/graalvm \
+	&& cd /opt/graalvm \
+	&& aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz \
+	&& tar -zxvf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
+	&& rm -rf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
+	&& ln -s /opt/graalvm/graalvm-jdk-21.0.6+8.1/bin/java /usr/bin/java \
+	&& ln -s /opt/graalvm/graalvm-jdk-21.0.6+8.1/bin/javac /usr/bin/javac \
+	&& ln -s /opt/graalvm/graalvm-jdk-21.0.6+8.1/bin/native-image /usr/bin/native-image
+ENV JAVA_HOME=/opt/graalvm/graalvm-jdk-21.0.6+8.1
 #install python 3.10
 RUN set -e \
 	&& apt install -y python3.10 python3-dev python3-pip python3.10-venv \ 
