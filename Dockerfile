@@ -38,6 +38,8 @@ RUN set -e \
 	&& ln -s /opt/graalvm/graalvm-jdk-21.0.6+8.1/bin/javac /usr/bin/javac \
 	&& ln -s /opt/graalvm/graalvm-jdk-21.0.6+8.1/bin/native-image /usr/bin/native-image
 ENV JAVA_HOME=/opt/graalvm/graalvm-jdk-21.0.6+8.1
+ENV GRAALVM_HOME=/opt/graalvm/graalvm-jdk-21.0.6+8.1
+
 #install python 3.10
 RUN set -e \
 	&& apt install -y python3.10 python3-dev python3-pip python3.10-venv \ 
