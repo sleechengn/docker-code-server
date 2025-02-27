@@ -40,6 +40,13 @@ RUN set -e \
 ENV JAVA_HOME=/opt/graalvm/graalvm-jdk-21.0.6+8.1
 ENV GRAALVM_HOME=/opt/graalvm/graalvm-jdk-21.0.6+8.1
 
+RUN set -e \
+	&& cd /opt \
+	&& aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz \
+	&& tar -zxvf apache-maven-3.9.9-bin.tar.gz \
+	&& rm -rf apache-maven-3.9.9-bin.tar.gz \
+	&& ln -s /opt/apache-maven-3.9.9/bin/mvn /usr/bin/mvn
+
 #install python 3.10
 RUN set -e \
 	&& apt install -y python3.10 python3-dev python3-pip python3.10-venv \ 
@@ -67,6 +74,12 @@ RUN rm -rf /etc/nginx/sites-enabled/default
 ADD ./NGINX /etc/nginx/sites-enabled/
 COPY ./docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
+
+#install chinese support
+RUN set -e \
+	&& apt install -y language-pack-zh-hans \
+	&& locale-gen zh_CN.UTF-8 \
+	&& sed -i '1a\export LC_ALL=zh_CN.UTF-8' /docker-entrypoint.sh
 
 CMD ["--bind-addr", "127.0.0.1:8080", "--auth", "none"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
