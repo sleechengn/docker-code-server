@@ -2,8 +2,7 @@ FROM ubuntu:jammy
 
 RUN mkdir /opt/cs
 WORKDIR /opt/cs
-
-
+#APT-PLACE-HOLDER
 RUN set -e \
 	&& apt update \
 	&& apt remove -y python* \
