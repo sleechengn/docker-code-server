@@ -80,6 +80,14 @@ RUN set -e \
 	&& locale-gen zh_CN.UTF-8 \
 	&& sed -i '1a\export LC_ALL=zh_CN.UTF-8' /docker-entrypoint.sh
 
+RUN set -e \
+	&& cd /root \
+	&& aria2c -x 10 -j 10 -o "uv-x86_64-unknown-linux-gnu.tar.gz" "https://github.com/astral-sh/uv/releases/download/0.6.6/uv-x86_64-unknown-linux-gnu.tar.gz" \
+	&& tar -zxvf uv-x86_64-unknown-linux-gnu.tar.gz \
+	&& cp -ra uv-x86_64-unknown-linux-gnu/uv /usr/bin/uv \
+	&& cp -ra uv-x86_64-unknown-linux-gnu/uvx /usr/bin/uvx \
+	&& rm -rf uv-x86_64-unknown-linux-gnu*
+
 CMD ["--bind-addr", "127.0.0.1:8080", "--auth", "none"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
