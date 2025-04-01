@@ -88,6 +88,17 @@ RUN set -e \
 	&& cp -ra uv-x86_64-unknown-linux-gnu/uvx /usr/bin/uvx \
 	&& rm -rf uv-x86_64-unknown-linux-gnu*
 
+#install scala
+RUN set -e \
+        && mkdir -p /opt/scala \
+        && cd /opt/scala \
+        && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://github.com/scala/scala3/releases/download/3.3.5/scala3-3.3.5.tar.gz \
+        && tar -zxvf ./scala3-3.3.5.tar.gz \
+        && rm -rf ./scala3-3.3.5.tar.gz \
+        && ln -s /opt/scala/scala3-3.3.5/bin/scala /usr/bin/scala \
+        && ln -s /opt/scala/scala3-3.3.5/bin/scalac /usr/bin/scalac
+ENV SCALA_HOME=/opt/scala/scala3-3.3.5
+
 CMD ["--bind-addr", "127.0.0.1:8080", "--auth", "none"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
