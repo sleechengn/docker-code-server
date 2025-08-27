@@ -17,15 +17,6 @@ RUN set -e \
 	&& dpkg -i ./code-server_4.93.1_amd64.deb \
 	&& rm -rf ./code-server_4.93.1_amd64.deb
 
-#install openjdk21
-#RUN set -e \
-#	&& aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://download.java.net/openjdk/jdk21/ri/openjdk-21+35_linux-x64_bin.tar.gz \
-#	&& tar -zxvf ./openjdk-21+35_linux-x64_bin.tar.gz \
-#	&& rm -rf ./openjdk-21+35_linux-x64_bin.tar.gz \
-#	&& ln -s /opt/cs/jdk-21/bin/java /usr/bin/java \
-#	&& ln -s /opt/cs/jdk-21/bin/javac /usr/bin/javac
-#ENV JAVA_HOME=/opt/cs/jdk-21
-
 #install graalvm
 RUN set -e \
 	&& mkdir -p /opt/graalvm \
@@ -33,34 +24,44 @@ RUN set -e \
 	&& aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz \
 	&& tar -zxvf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
 	&& rm -rf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
-	&& ln -s /opt/graalvm/graalvm-jdk-21.0.6+8.1/bin/java /usr/bin/java \
-	&& ln -s /opt/graalvm/graalvm-jdk-21.0.6+8.1/bin/javac /usr/bin/javac \
-	&& ln -s /opt/graalvm/graalvm-jdk-21.0.6+8.1/bin/native-image /usr/bin/native-image
-ENV JAVA_HOME=/opt/graalvm/graalvm-jdk-21.0.6+8.1
-ENV GRAALVM_HOME=/opt/graalvm/graalvm-jdk-21.0.6+8.1
+	&& PATH_FRAG=$(ls -A /opt/graalvm) \
+	&& ln -s /opt/graalvm/$PATH_FRAG/bin/java /usr/bin/java \
+	&& ln -s /opt/graalvm/$PATH_FRAG/bin/javac /usr/bin/javac \
+	&& ln -s /opt/graalvm/$PATH_FRAG/bin/native-image /usr/bin/native-image \
+	&& java -version
+ENV JAVA_HOME=/opt/graalvm/$PATH_FRAG
+ENV GRAALVM_HOME=/opt/graalvm/$PATH_FRAG
 
+# mnv
 RUN set -e \
-	&& cd /opt \
-	&& aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz \
-	&& tar -zxvf apache-maven-3.9.9-bin.tar.gz \
-	&& rm -rf apache-maven-3.9.9-bin.tar.gz \
-	&& ln -s /opt/apache-maven-3.9.9/bin/mvn /usr/bin/mvn
+        && cd /opt \
+        && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz \
+        && tar -zxvf apache-maven-3.9.11-bin.tar.gz \
+        && rm -rf apache-maven-3.9.11-bin.tar.gz \
+        && ln -s /opt/apache-maven-3.9.11/bin/mvn /usr/bin/mvn
 
-#install python 3.10
+# uv
 RUN set -e \
-	&& apt install -y python3.10 python3-dev python3-pip python3.10-venv \ 
-	&& rm -rf /usr/bin/python3 \
-	&& rm -rf /usr/bin/python \
-	&& ln -s $(which python3.10) /usr/bin/python \
-	&& ln -s $(which python3.10) /usr/bin/python3
+        && apt install -y curl \
+        && mkdir /opt/uv \
+        && cd /opt/uv \
+        && DOWNLOAD=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm| cut -d'"' -f4) \
+        && aria2c -x 10 -j 10 -k 1M $DOWNLOAD -o uv.tar.gz \
+        && tar -zxvf uv.tar.gz \
+        && rm -rf uv.tar.gz \
+	&& PATH_FRAG=$(ls /opt/uv) \
+        && ln -s /opt/uv/$PATH_FRAG/uv /usr/bin/uv \
+        && ln -s /opt/uv/$PATH_FRAG/uvx /usr/bin/uvx \
+        && uv venv /opt/venv --python 3.12
 
+# code-sever
 RUN set -e \
 	&& /usr/bin/code-server --install-extension vscjava.vscode-java-pack \
-	&& /usr/bin/code-server --install-extension gabrielbb.vscode-lombok \
+	#&& /usr/bin/code-server --install-extension gabrielbb.vscode-lombok \
 	&& /usr/bin/code-server --install-extension alphabotsec.vscode-eclipse-keybindings \
 	&& /usr/bin/code-server --install-extension arzg.intellij-theme \
-	&& /usr/bin/code-server --install-extension ms-python.python \
-	&& /usr/bin/code-server --install-extension tht13.python
+	&& /usr/bin/code-server --install-extension ms-python.python
+	#&& /usr/bin/code-server --install-extension tht13.python
 
 RUN set -e \
 	&& apt install -y nginx ttyd \
@@ -80,14 +81,6 @@ RUN set -e \
 	&& locale-gen zh_CN.UTF-8 \
 	&& sed -i '1a\export LC_ALL=zh_CN.UTF-8' /docker-entrypoint.sh
 
-RUN set -e \
-	&& cd /root \
-	&& aria2c -x 10 -j 10 -o "uv-x86_64-unknown-linux-gnu.tar.gz" "https://github.com/astral-sh/uv/releases/download/0.6.6/uv-x86_64-unknown-linux-gnu.tar.gz" \
-	&& tar -zxvf uv-x86_64-unknown-linux-gnu.tar.gz \
-	&& cp -ra uv-x86_64-unknown-linux-gnu/uv /usr/bin/uv \
-	&& cp -ra uv-x86_64-unknown-linux-gnu/uvx /usr/bin/uvx \
-	&& rm -rf uv-x86_64-unknown-linux-gnu*
-
 #install scala
 RUN set -e \
         && mkdir -p /opt/scala \
@@ -95,14 +88,14 @@ RUN set -e \
         && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://github.com/scala/scala3/releases/download/3.3.5/scala3-3.3.5.tar.gz \
         && tar -zxvf ./scala3-3.3.5.tar.gz \
         && rm -rf ./scala3-3.3.5.tar.gz \
-        && ln -s /opt/scala/scala3-3.3.5/bin/scala /usr/bin/scala \
-        && ln -s /opt/scala/scala3-3.3.5/bin/scalac /usr/bin/scalac
-ENV SCALA_HOME=/opt/scala/scala3-3.3.5
+	&& PATH_FRAG=$(ls -A /opt/scala) \
+        && ln -s /opt/scala/$PATH_FRAG/bin/scala /usr/bin/scala \
+        && ln -s /opt/scala/$PATH_FRAG/bin/scalac /usr/bin/scalac
+ENV SCALA_HOME=/opt/scala/$PATH_FRAG
 
 CMD ["--bind-addr", "127.0.0.1:8080", "--auth", "none"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-VOLUME /usr/local/lib/python3.10/dist-packages
 VOLUME /root
 VOLUME /opt
 VOLUME /workspace
