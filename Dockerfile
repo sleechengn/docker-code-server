@@ -57,11 +57,11 @@ RUN set -e \
 # code-sever
 RUN set -e \
 	&& /usr/bin/code-server --install-extension vscjava.vscode-java-pack \
-	#&& /usr/bin/code-server --install-extension gabrielbb.vscode-lombok \
+	&& /usr/bin/code-server --install-extension kylinideteam.kylin-cpp-pack \
 	&& /usr/bin/code-server --install-extension alphabotsec.vscode-eclipse-keybindings \
 	&& /usr/bin/code-server --install-extension arzg.intellij-theme \
-	&& /usr/bin/code-server --install-extension ms-python.python
-	#&& /usr/bin/code-server --install-extension tht13.python
+	&& /usr/bin/code-server --install-extension ms-python.python \
+	&& /usr/bin/code-server --install-extension ms-vscode.vscode-typescript-next
 
 RUN set -e \
 	&& apt install -y nginx ttyd \
