@@ -1,7 +1,8 @@
 FROM ubuntu:jammy
 
-RUN mkdir /opt/cs
-WORKDIR /opt/cs
+RUN mkdir /opt/code-server
+WORKDIR /opt/code-server
+
 #APT-PLACE-HOLDER
 RUN set -e \
 	&& apt update \
@@ -9,7 +10,10 @@ RUN set -e \
 	&& apt autoremove \
 	&& apt autoclean \
 	&& apt autopurge \
-	&& apt install -y wget git aria2
+	&& apt install -y wget git aria2 nginx ttyd curl nano psmisc net-tools gcc make g++ \
+	&& apt autoremove \
+        && apt autoclean \
+        && apt autopurge
 
 #install code-server online
 RUN set -e \
@@ -65,10 +69,16 @@ RUN set -e \
 
 RUN set -e \
 	&& apt install -y nginx ttyd \
-	&& apt install -y curl \
-	&& curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash \
-	&& mkdir /opt/filebrowser \
-	&& apt autoremove
+	&& apt install -y curl
+
+# filebrowser
+run mkdir /opt/filebrowser \
+        && cd /opt/filebrowser\
+        && DOWNLOAD=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4) \
+        && aria2c -x 10 -j 10 -k 1M $DOWNLOAD -o linux-amd64-filebrowser.tar.gz \
+        && tar -zxvf linux-amd64-filebrowser.tar.gz \
+        && rm -rf linux-amd64-filebrowser.tar.gz \
+        && ln -s /opt/filebrowser/filebrowser /usr/bin/filebrowser
 
 RUN rm -rf /etc/nginx/sites-enabled/default
 ADD ./NGINX /etc/nginx/sites-enabled/
@@ -92,6 +102,18 @@ RUN set -e \
         && ln -s /opt/scala/$PATH_FRAG/bin/scala /usr/bin/scala \
         && ln -s /opt/scala/$PATH_FRAG/bin/scalac /usr/bin/scalac
 ENV SCALA_HOME=/opt/scala/$PATH_FRAG
+
+# nodejs
+RUN set -e \
+	&& mkdir /opt/nodejs \
+	&& cd /opt/nodejs && apt install -y xz-utils \
+	&& wget https://nodejs.org/dist/v24.7.0/node-v24.7.0-linux-x64.tar.xz \
+	&& xz -d node-v24.7.0-linux-x64.tar.xz \
+	&& tar -xvf node-v24.7.0-linux-x64.tar \
+	&& ln -s /opt/nodejs/node-v24.7.0-linux-x64/bin/node /usr/bin/node \
+	&& ln -s /opt/nodejs/node-v24.7.0-linux-x64/bin/npm /usr/bin/npm \
+	&& ln -s /opt/nodejs/node-v24.7.0-linux-x64/bin/npx /usr/bin/npx \
+	&& rm -rf node-v24.7.0-linux-x64.tar && apt clean
 
 CMD ["--bind-addr", "127.0.0.1:8080", "--auth", "none"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
