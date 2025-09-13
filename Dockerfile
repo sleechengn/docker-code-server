@@ -20,8 +20,8 @@ RUN set -e \
 	&& aria2c -x 10 -j 10 -k 1m "$DOWNLOAD" -o "code-server.tar.gz" \
 	&& tar -zxvf code-server.tar.gz \
 	&& rm -rf code-server.tar.gz \
-	&& PATH_PART=$(ls -A /opt/code-server) \
-	&& ln -s /opt/code-server/$PATH_PART/bin/code-server /usr/bin/code-server
+	&& PATH_PART=$(pwd)/$(ls -A .) \
+	&& ln -s $PATH_PART/bin/code-server /usr/bin/code-server
 
 #install graalvm
 RUN set -e \
@@ -30,21 +30,20 @@ RUN set -e \
 	&& aria2c -x 10 -j 10 -k 1m https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz \
 	&& tar -zxvf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
 	&& rm -rf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
-	&& PATH_FRAG=$(ls -A /opt/graalvm) \
-	&& ln -s /opt/graalvm/$PATH_FRAG/bin/java /usr/bin/java \
-	&& ln -s /opt/graalvm/$PATH_FRAG/bin/javac /usr/bin/javac \
-	&& ln -s /opt/graalvm/$PATH_FRAG/bin/native-image /usr/bin/native-image \
+	&& PATH_FRAG=$(pwd)/$(ls -A .) \
+	&& ln -s $PATH_FRAG/bin/java /usr/bin/java \
+	&& ln -s $PATH_FRAG/bin/javac /usr/bin/javac \
+	&& ln -s $PATH_FRAG/bin/native-image /usr/bin/native-image \
 	&& java -version
-ENV JAVA_HOME=/opt/graalvm/$PATH_FRAG
-ENV GRAALVM_HOME=/opt/graalvm/$PATH_FRAG
 
 # mnv
 RUN set -e \
-        && cd /opt \
+	&& mkdir /opt/maven \
+        && cd /opt/maven \
         && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz \
         && tar -zxvf apache-maven-3.9.11-bin.tar.gz \
         && rm -rf apache-maven-3.9.11-bin.tar.gz \
-        && ln -s /opt/apache-maven-3.9.11/bin/mvn /usr/bin/mvn
+        && ln -s $(pwd)/$(ls -A .)/bin/mvn /usr/bin/mvn
 
 # uv
 RUN set -e \
@@ -54,9 +53,9 @@ RUN set -e \
         && aria2c -x 10 -j 10 -k 1M $DOWNLOAD -o uv.tar.gz \
         && tar -zxvf uv.tar.gz \
         && rm -rf uv.tar.gz \
-	&& PATH_FRAG=$(ls /opt/uv) \
-        && ln -s /opt/uv/$PATH_FRAG/uv /usr/bin/uv \
-        && ln -s /opt/uv/$PATH_FRAG/uvx /usr/bin/uvx 
+	&& PATH_FRAG=$(pwd)/$(ls -A .) \
+        && ln -s $PATH_FRAG/uv /usr/bin/uv \
+        && ln -s $PATH_FRAG/uvx /usr/bin/uvx 
 
 # code-sever extension
 # java extension
@@ -80,7 +79,7 @@ run mkdir /opt/filebrowser \
         && aria2c -x 10 -j 10 -k 1M $DOWNLOAD -o linux-amd64-filebrowser.tar.gz \
         && tar -zxvf linux-amd64-filebrowser.tar.gz \
         && rm -rf linux-amd64-filebrowser.tar.gz \
-        && ln -s /opt/filebrowser/filebrowser /usr/bin/filebrowser
+        && ln -s $(pwd)/filebrowser /usr/bin/filebrowser
 
 #install chinese support
 RUN set -e \
@@ -94,10 +93,9 @@ RUN set -e \
         && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://github.com/scala/scala3/releases/download/3.3.5/scala3-3.3.5.tar.gz \
         && tar -zxvf ./scala3-3.3.5.tar.gz \
         && rm -rf ./scala3-3.3.5.tar.gz \
-	&& PATH_FRAG=$(ls -A /opt/scala) \
-        && ln -s /opt/scala/$PATH_FRAG/bin/scala /usr/bin/scala \
-        && ln -s /opt/scala/$PATH_FRAG/bin/scalac /usr/bin/scalac
-ENV SCALA_HOME=/opt/scala/$PATH_FRAG
+	&& PATH_FRAG=$(pwd)/$(ls -A .) \
+        && ln -s $PATH_FRAG/bin/scala /usr/bin/scala \
+        && ln -s $PATH_FRAG/bin/scalac /usr/bin/scalac
 
 # nodejs
 RUN set -e \
@@ -105,11 +103,13 @@ RUN set -e \
 	&& cd /opt/nodejs && apt install -y xz-utils \
 	&& wget https://nodejs.org/dist/v24.7.0/node-v24.7.0-linux-x64.tar.xz \
 	&& xz -d node-v24.7.0-linux-x64.tar.xz \
+	&& rm -rf node-v24.7.0-linux-x64.tar.xz \
 	&& tar -xvf node-v24.7.0-linux-x64.tar \
-	&& ln -s /opt/nodejs/node-v24.7.0-linux-x64/bin/node /usr/bin/node \
-	&& ln -s /opt/nodejs/node-v24.7.0-linux-x64/bin/npm /usr/bin/npm \
-	&& ln -s /opt/nodejs/node-v24.7.0-linux-x64/bin/npx /usr/bin/npx \
-	&& rm -rf node-v24.7.0-linux-x64.tar && apt clean
+	&& rm -rf node-v24.7.0-linux-x64.tar \
+	&& PATH_PRE=$(pwd)/$(ls -A .) \
+	&& ln -s $PATH_PRE/bin/node /usr/bin/node \
+	&& ln -s $PATH_PRE/bin/npm /usr/bin/npm \
+	&& ln -s $PATH_PRE/bin/npx /usr/bin/npx
 
 # trzsz
 #&& DOWNLOAD=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4)
