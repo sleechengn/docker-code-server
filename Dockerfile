@@ -1,8 +1,5 @@
 FROM ubuntu:jammy
 
-RUN mkdir /opt/code-server
-WORKDIR /opt/code-server
-
 #APT-PLACE-HOLDER
 RUN set -e \
 	&& apt update \
@@ -10,22 +7,27 @@ RUN set -e \
 	&& apt autoremove \
 	&& apt autoclean \
 	&& apt autopurge \
-	&& apt install -y wget git aria2 nginx ttyd curl nano psmisc net-tools gcc make g++ \
+	&& apt install -y wget git aria2 nginx ttyd curl nano psmisc net-tools gcc make g++ tmux \
 	&& apt autoremove \
         && apt autoclean \
         && apt autopurge
 
 #install code-server online
 RUN set -e \
-	&& aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 "https://github.com/coder/code-server/releases/download/v4.93.1/code-server_4.93.1_amd64.deb" -o "code-server_4.93.1_amd64.deb" \
-	&& dpkg -i ./code-server_4.93.1_amd64.deb \
-	&& rm -rf ./code-server_4.93.1_amd64.deb
+	&& mkdir -p /opt/code-server \
+	&& cd /opt/code-server \
+	&& DOWNLOAD=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4) \
+	&& aria2c -x 10 -j 10 -k 1m "$DOWNLOAD" -o "code-server.tar.gz" \
+	&& tar -zxvf code-server.tar.gz \
+	&& rm -rf code-server.tar.gz \
+	&& PATH_PART=$(ls -A /opt/code-server) \
+	&& ln -s /opt/code-server/$PATH_PART/bin/code-server /usr/bin/code-server
 
 #install graalvm
 RUN set -e \
 	&& mkdir -p /opt/graalvm \
 	&& cd /opt/graalvm \
-	&& aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz \
+	&& aria2c -x 10 -j 10 -k 1m https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz \
 	&& tar -zxvf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
 	&& rm -rf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
 	&& PATH_FRAG=$(ls -A /opt/graalvm) \
@@ -46,7 +48,6 @@ RUN set -e \
 
 # uv
 RUN set -e \
-        && apt install -y curl \
         && mkdir /opt/uv \
         && cd /opt/uv \
         && DOWNLOAD=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm| cut -d'"' -f4) \
@@ -55,21 +56,22 @@ RUN set -e \
         && rm -rf uv.tar.gz \
 	&& PATH_FRAG=$(ls /opt/uv) \
         && ln -s /opt/uv/$PATH_FRAG/uv /usr/bin/uv \
-        && ln -s /opt/uv/$PATH_FRAG/uvx /usr/bin/uvx \
-        && uv venv /opt/venv --python 3.12
+        && ln -s /opt/uv/$PATH_FRAG/uvx /usr/bin/uvx 
 
-# code-sever
-RUN set -e \
-	&& /usr/bin/code-server --install-extension vscjava.vscode-java-pack \
-	&& /usr/bin/code-server --install-extension kylinideteam.kylin-cpp-pack \
-	&& /usr/bin/code-server --install-extension alphabotsec.vscode-eclipse-keybindings \
-	&& /usr/bin/code-server --install-extension arzg.intellij-theme \
-	&& /usr/bin/code-server --install-extension ms-python.python \
-	&& /usr/bin/code-server --install-extension ms-vscode.vscode-typescript-next
-
-RUN set -e \
-	&& apt install -y nginx ttyd \
-	&& apt install -y curl
+# code-sever extension
+# java extension
+RUN /usr/bin/code-server --install-extension vscjava.vscode-java-pack
+RUN /usr/bin/code-server --install-extension kylinideteam.kylin-cpp-pack
+RUN /usr/bin/code-server --install-extension alphabotsec.vscode-eclipse-keybindings 
+RUN /usr/bin/code-server --install-extension arzg.intellij-theme
+# python extension
+RUN /usr/bin/code-server --install-extension ms-python.python
+# React Web TS
+RUN /usr/bin/code-server --install-extension tomi.xasnippets
+RUN /usr/bin/code-server --install-extension franneck94.vscode-typescript-extension-pack
+RUN /usr/bin/code-server --install-extension dsznajder.es7-react-js-snippets
+# C C++
+RUN /usr/bin/code-server --install-extension franneck94.vscode-c-cpp-dev-extension-pack
 
 # filebrowser
 run mkdir /opt/filebrowser \
