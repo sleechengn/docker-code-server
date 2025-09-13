@@ -125,7 +125,7 @@ RUN set -e \
 #	&& ln -s $BIN_DIR/tsz /usr/bin/tsz
 
 RUN set -e \
-       && DOWNLOAD=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd|grep x86_64|grep tar| cut -d'"' -f4)
+       && DOWNLOAD=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd|grep x86_64|grep tar| cut -d'"' -f4) \
        && aria2c -x 10 -j 10 -k 1m $DOWNLOAD -o /usr/bin/ttyd.x86_64 \
        && chmod +x /usr/bin/ttyd.x86_64
 
