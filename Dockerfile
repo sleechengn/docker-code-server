@@ -7,7 +7,7 @@ RUN set -e \
 	&& apt autoremove \
 	&& apt autoclean \
 	&& apt autopurge \
-	&& apt install -y wget git aria2 nginx ttyd curl nano psmisc net-tools gcc make g++ tmux cmake \
+	&& apt install -y wget git lrzsz aria2 nginx ttyd curl nano psmisc net-tools gcc make g++ tmux cmake \
 	&& apt autoremove \
         && apt autoclean \
         && apt autopurge
@@ -82,16 +82,10 @@ run mkdir /opt/filebrowser \
         && rm -rf linux-amd64-filebrowser.tar.gz \
         && ln -s /opt/filebrowser/filebrowser /usr/bin/filebrowser
 
-RUN rm -rf /etc/nginx/sites-enabled/default
-ADD ./NGINX /etc/nginx/sites-enabled/
-COPY ./docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-
 #install chinese support
 RUN set -e \
 	&& apt install -y language-pack-zh-hans \
-	&& locale-gen zh_CN.UTF-8 \
-	&& sed -i '1a\export LC_ALL=zh_CN.UTF-8' /docker-entrypoint.sh
+	&& locale-gen zh_CN.UTF-8
 
 #install scala
 RUN set -e \
@@ -116,6 +110,30 @@ RUN set -e \
 	&& ln -s /opt/nodejs/node-v24.7.0-linux-x64/bin/npm /usr/bin/npm \
 	&& ln -s /opt/nodejs/node-v24.7.0-linux-x64/bin/npx /usr/bin/npx \
 	&& rm -rf node-v24.7.0-linux-x64.tar && apt clean
+
+# trzsz
+#&& DOWNLOAD=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4)
+#RUN set -e \
+#	&& mkdir /opt/trzsz && cd /opt/trzsz \
+#	&& DOWNLOAD="https://github.com/trzsz/trzsz-go/releases/download/v1.1.8/trzsz_1.1.8_linux_x86_64.tar.gz" \
+#	&& aria2c -x 10 -j 10 -k 1m $DOWNLOAD -o bin.tar.gz \
+#	&& tar -zxvf bin.tar.gz \
+#	&& rm -rf bin.tar.gz \
+#	&& BIN_DIR=$(pwd)/$(ls -A .) \
+#	&& ln -s $BIN_DIR/trzsz /usr/bin/trzsz \
+#	&& ln -s $BIN_DIR/trz /usr/bin/trz \
+#	&& ln -s $BIN_DIR/tsz /usr/bin/tsz
+
+RUN set -e \
+       && DOWNLOAD=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd|grep x86_64|grep tar| cut -d'"' -f4)
+       && aria2c -x 10 -j 10 -k 1m $DOWNLOAD -o /usr/bin/ttyd.x86_64 \
+       && chmod +x /usr/bin/ttyd.x86_64
+
+RUN rm -rf /etc/nginx/sites-enabled/default
+ADD ./NGINX /etc/nginx/sites-enabled/
+COPY ./docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
+RUN sed -i '1a\export LC_ALL=zh_CN.UTF-8' /docker-entrypoint.sh
 
 CMD ["--bind-addr", "127.0.0.1:8080", "--auth", "none"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
