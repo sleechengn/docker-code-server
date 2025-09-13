@@ -112,17 +112,19 @@ RUN set -e \
 	&& ln -s $PATH_PRE/bin/npx /usr/bin/npx
 
 # trzsz
-#&& DOWNLOAD=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4)
-#RUN set -e \
-#	&& mkdir /opt/trzsz && cd /opt/trzsz \
-#	&& DOWNLOAD="https://github.com/trzsz/trzsz-go/releases/download/v1.1.8/trzsz_1.1.8_linux_x86_64.tar.gz" \
-#	&& aria2c -x 10 -j 10 -k 1m $DOWNLOAD -o bin.tar.gz \
-#	&& tar -zxvf bin.tar.gz \
-#	&& rm -rf bin.tar.gz \
-#	&& BIN_DIR=$(pwd)/$(ls -A .) \
-#	&& ln -s $BIN_DIR/trzsz /usr/bin/trzsz \
-#	&& ln -s $BIN_DIR/trz /usr/bin/trz \
-#	&& ln -s $BIN_DIR/tsz /usr/bin/tsz
+#
+#DOWNLOAD=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4)
+#DOWNLOAD="https://github.com/trzsz/trzsz-go/releases/download/v1.1.8/trzsz_1.1.8_linux_x86_64.tar.gz"
+RUN set -e \
+	&& mkdir /opt/trzsz && cd /opt/trzsz \
+	&& DOWNLOAD=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4) \
+	&& aria2c -x 10 -j 10 -k 1m $DOWNLOAD -o bin.tar.gz \
+	&& tar -zxvf bin.tar.gz \
+	&& rm -rf bin.tar.gz \
+	&& BIN_DIR=$(pwd)/$(ls -A .) \
+	&& ln -s $BIN_DIR/trzsz /usr/bin/trzsz \
+	&& ln -s $BIN_DIR/trz /usr/bin/trz \
+	&& ln -s $BIN_DIR/tsz /usr/bin/tsz
 
 RUN set -e \
        && DOWNLOAD=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd.x86_64| cut -d'"' -f4) \
