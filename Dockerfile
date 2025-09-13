@@ -7,7 +7,7 @@ RUN set -e \
 	&& apt autoremove \
 	&& apt autoclean \
 	&& apt autopurge \
-	&& apt install -y wget git lrzsz aria2 nginx ttyd curl nano psmisc net-tools gcc make g++ tmux cmake \
+	&& apt install -y wget git lrzsz aria2 nginx curl nano psmisc net-tools gcc make g++ tmux cmake xz-utils \
 	&& apt autoremove \
         && apt autoclean \
         && apt autopurge
@@ -100,7 +100,7 @@ RUN set -e \
 # nodejs
 RUN set -e \
 	&& mkdir /opt/nodejs \
-	&& cd /opt/nodejs && apt install -y xz-utils \
+	&& cd /opt/nodejs \
 	&& wget https://nodejs.org/dist/v24.7.0/node-v24.7.0-linux-x64.tar.xz \
 	&& xz -d node-v24.7.0-linux-x64.tar.xz \
 	&& rm -rf node-v24.7.0-linux-x64.tar.xz \
@@ -125,7 +125,7 @@ RUN set -e \
 #	&& ln -s $BIN_DIR/tsz /usr/bin/tsz
 
 RUN set -e \
-       && DOWNLOAD=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd|grep x86_64|grep tar| cut -d'"' -f4) \
+       && DOWNLOAD=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd.x86_64| cut -d'"' -f4) \
        && aria2c -x 10 -j 10 -k 1m $DOWNLOAD -o /usr/bin/ttyd.x86_64 \
        && chmod +x /usr/bin/ttyd.x86_64
 
