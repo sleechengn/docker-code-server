@@ -7,7 +7,7 @@ RUN set -e \
 	&& apt autoremove \
 	&& apt autoclean \
 	&& apt autopurge \
-	&& apt install -y wget git aria2 nginx ttyd curl nano psmisc net-tools gcc make g++ tmux \
+	&& apt install -y wget git aria2 nginx ttyd curl nano psmisc net-tools gcc make g++ tmux cmake \
 	&& apt autoremove \
         && apt autoclean \
         && apt autopurge
