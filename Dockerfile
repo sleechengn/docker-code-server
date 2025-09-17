@@ -91,7 +91,7 @@ RUN set -e \
 RUN set -e \
         && mkdir -p /opt/scala \
         && cd /opt/scala \
-        && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://github.com/scala/scala3/releases/download/3.3.5/scala3-3.3.5.tar.gz \
+        && aria2c -x 10 -k 1M -x 10 https://github.com/scala/scala3/releases/download/3.3.5/scala3-3.3.5.tar.gz \
         && tar -zxvf ./scala3-3.3.5.tar.gz \
         && rm -rf ./scala3-3.3.5.tar.gz \
 	&& PATH_FRAG=$(pwd)/$(ls -A .) \
