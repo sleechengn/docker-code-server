@@ -102,7 +102,7 @@ RUN set -e \
 RUN set -e \
 	&& mkdir /opt/nodejs \
 	&& cd /opt/nodejs \
-	&& wget https://nodejs.org/dist/v24.7.0/node-v24.7.0-linux-x64.tar.xz \
+	&& aria2c -x 10 -j 10 -k 1m https://nodejs.org/dist/v24.7.0/node-v24.7.0-linux-x64.tar.xz \
 	&& xz -d node-v24.7.0-linux-x64.tar.xz \
 	&& rm -rf node-v24.7.0-linux-x64.tar.xz \
 	&& tar -xvf node-v24.7.0-linux-x64.tar \
