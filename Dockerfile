@@ -65,6 +65,7 @@ RUN /usr/bin/code-server --install-extension alphabotsec.vscode-eclipse-keybindi
 RUN /usr/bin/code-server --install-extension arzg.intellij-theme
 # python extension
 RUN /usr/bin/code-server --install-extension ms-python.python
+RUN /usr/bin/code-server --install-extension toughtype.pydance
 # React Web TS
 RUN /usr/bin/code-server --install-extension tomi.xasnippets
 RUN /usr/bin/code-server --install-extension franneck94.vscode-typescript-extension-pack
