@@ -113,9 +113,6 @@ RUN set -e \
 	&& ln -s $PATH_PRE/bin/npx /usr/bin/npx
 
 # trzsz
-#
-#DOWNLOAD=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4)
-#DOWNLOAD="https://github.com/trzsz/trzsz-go/releases/download/v1.1.8/trzsz_1.1.8_linux_x86_64.tar.gz"
 RUN set -e \
 	&& mkdir /opt/trzsz && cd /opt/trzsz \
 	&& DOWNLOAD=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4) \
