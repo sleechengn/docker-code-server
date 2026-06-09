@@ -1,34 +1,34 @@
-FROM ubuntu:jammy
+FROM debian:trixie
 
 #APT-PLACE-HOLDER
-RUN set -e \
+RUN echo apt-install && set -e \
 	&& apt update \
 	&& apt remove -y python* \
 	&& apt autoremove \
 	&& apt autoclean \
 	&& apt autopurge \
-	&& apt install -y wget git lrzsz aria2 nginx curl nano psmisc net-tools gcc make g++ tmux cmake xz-utils \
+	&& apt install -y wget git lrzsz aria2 nginx curl nano psmisc net-tools gcc make g++ tmux cmake fish xz-utils \
 	&& apt autoremove \
         && apt autoclean \
         && apt autopurge
 
 #install code-server online
-RUN set -e \
+RUN echo code-server-install && set -e \
 	&& mkdir -p /opt/code-server \
 	&& cd /opt/code-server \
-	&& DOWNLOAD=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4) \
-	&& aria2c -x 10 -j 10 -k 1m "$DOWNLOAD" -o "code-server.tar.gz" \
-	&& tar -zxvf code-server.tar.gz \
+	&& echo fetch-code-server-url && DOWNLOAD=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4) \
+	&& echo fetch-code-server-tar && aria2c -x 10 -j 10 -k 1m "$DOWNLOAD" -o "code-server.tar.gz" \
+	&& echo exist code-server-tar && tar -zxvf code-server.tar.gz \
 	&& rm -rf code-server.tar.gz \
 	&& PATH_PART=$(pwd)/$(ls -A .) \
 	&& ln -s $PATH_PART/bin/code-server /usr/bin/code-server
 
 #install graalvm
-RUN set -e \
+RUN echo install-graalvm set -e \
 	&& mkdir -p /opt/graalvm \
 	&& cd /opt/graalvm \
-	&& aria2c -x 10 -j 10 -k 1m https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz \
-	&& tar -zxvf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
+	&& echo fetch-graalvm-tar && aria2c -x 10 -j 10 -k 1m https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz \
+	&& echo exist graalvm && tar -zxvf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
 	&& rm -rf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
 	&& PATH_FRAG=$(pwd)/$(ls -A .) \
 	&& ln -s $PATH_FRAG/bin/java /usr/bin/java \
@@ -83,7 +83,7 @@ run mkdir /opt/filebrowser \
         && ln -s $(pwd)/filebrowser /usr/bin/filebrowser
 
 #install chinese support
-RUN set -e \
+RUN echo apt-install && set -e \
 	&& apt install -y language-pack-zh-hans \
 	&& locale-gen zh_CN.UTF-8
 

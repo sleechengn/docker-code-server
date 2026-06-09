@@ -6,6 +6,7 @@ nohup ttyd.x86_64 --port 8082 --base-path /ttyd --writable -t enableZmodem=true 
 cat > ~/.tmux.conf <<EOF
 set -g mouse on
 unbind -n MouseDown3Pane
+set -g default-command fish
 EOF
 tmux source ~/.tmux.conf
 
