@@ -37,11 +37,11 @@ RUN echo install-graalvm && set -e \
 	&& java -version
 
 # mnv
-RUN set -e \
+RUN echo install-mvn && set -e \
 	&& mkdir /opt/maven \
         && cd /opt/maven \
-        && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz \
-        && tar -zxvf apache-maven-3.9.11-bin.tar.gz \
+        && echo pull-mvn-zip && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz \
+        && echo decode-mvn-tar && tar -zxvf apache-maven-3.9.11-bin.tar.gz \
         && rm -rf apache-maven-3.9.11-bin.tar.gz \
         && ln -s $(pwd)/$(ls -A .)/bin/mvn /usr/bin/mvn
 
