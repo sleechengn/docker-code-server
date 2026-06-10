@@ -27,9 +27,9 @@ RUN echo code-server-install && set -e \
 RUN echo install-graalvm && set -e \
 	&& mkdir -p /opt/graalvm \
 	&& cd /opt/graalvm \
-	&& echo fetch-graalvm-tar && aria2c -x 10 -j 10 -k 1m https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz \
-	&& echo exist graalvm && tar -zxvf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
-	&& rm -rf ./graalvm-jdk-21_linux-x64_bin.tar.gz \
+	&& echo fetch-graalvm-tar && aria2c -x 10 -j 10 -k 1m https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.1/graalvm-community-jdk-21.0.1_linux-aarch64_bin.tar.gz \
+	&& echo exist graalvm && tar -zxvf ./graalvm-community-jdk-21.0.1_linux-aarch64_bin.tar.gz \
+	&& rm -rf ./graalvm-community-jdk-21.0.1_linux-aarch64_bin.tar.gz \
 	&& PATH_FRAG=$(pwd)/$(ls -A .) \
 	&& ln -s $PATH_FRAG/bin/java /usr/bin/java \
 	&& ln -s $PATH_FRAG/bin/javac /usr/bin/javac \
