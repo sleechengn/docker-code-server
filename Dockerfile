@@ -24,7 +24,7 @@ RUN echo code-server-install && set -e \
 	&& ln -s $PATH_PART/bin/code-server /usr/bin/code-server
 
 #install graalvm
-RUN echo install-graalvm set -e \
+RUN echo install-graalvm && set -e \
 	&& mkdir -p /opt/graalvm \
 	&& cd /opt/graalvm \
 	&& echo fetch-graalvm-tar && aria2c -x 10 -j 10 -k 1m https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz \
