@@ -40,18 +40,18 @@ RUN echo install-graalvm && set -e \
 RUN echo install-mvn && set -e \
 	&& mkdir /opt/maven \
         && cd /opt/maven \
-        && echo pull-mvn-zip && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz \
-        && echo decode-mvn-tar && tar -zxvf apache-maven-3.9.11-bin.tar.gz \
+        && echo pull-mvn-bin && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz \
+        && echo unpack-mvn-bin && tar -zxvf apache-maven-3.9.11-bin.tar.gz \
         && rm -rf apache-maven-3.9.11-bin.tar.gz \
         && ln -s $(pwd)/$(ls -A .)/bin/mvn /usr/bin/mvn
 
 # uv
-RUN set -e \
+RUN echo install-uv && set -e \
         && mkdir /opt/uv \
         && cd /opt/uv \
-        && DOWNLOAD=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm| cut -d'"' -f4) \
-        && aria2c -x 10 -j 10 -k 1M $DOWNLOAD -o uv.tar.gz \
-        && tar -zxvf uv.tar.gz \
+        && echo fetch-uv-url && DOWNLOAD=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm| cut -d'"' -f4) \
+        && echo fetch-uv-bin && aria2c -x 10 -j 10 -k 1M $DOWNLOAD -o uv.tar.gz \
+        && echo unpack-uv-bin && tar -zxvf uv.tar.gz \
         && rm -rf uv.tar.gz \
 	&& PATH_FRAG=$(pwd)/$(ls -A .) \
         && ln -s $PATH_FRAG/uv /usr/bin/uv \
