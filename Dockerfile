@@ -1,3 +1,4 @@
+ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.1/graalvm-community-jdk-21.0.1_linux-aarch64_bin.tar.gz
 FROM debian:trixie
 
 #APT-PLACE-HOLDER
@@ -27,9 +28,9 @@ RUN echo code-server-install && set -e \
 RUN echo install-graalvm && set -e \
 	&& mkdir -p /opt/graalvm \
 	&& cd /opt/graalvm \
-	&& echo fetch-graalvm-tar && aria2c -x 10 -j 10 -k 1m https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.1/graalvm-community-jdk-21.0.1_linux-aarch64_bin.tar.gz \
-	&& echo exist graalvm && tar -zxvf ./graalvm-community-jdk-21.0.1_linux-aarch64_bin.tar.gz \
-	&& rm -rf ./graalvm-community-jdk-21.0.1_linux-aarch64_bin.tar.gz \
+	&& echo fetch-graalvm-tar && aria2c -x 10 -j 10 -k 1m -o graalvm-community-jdk-21.0.1_linux_bin.tar.gz ${GRAALVM_DL} \
+	&& echo exist graalvm && tar -zxvf ./graalvm-community-jdk-21.0.1_linux_bin.tar.gz \
+	&& rm -rf ./graalvm-community-jdk-21.0.1_linux_bin.tar.gz \
 	&& PATH_FRAG=$(pwd)/$(ls -A .) \
 	&& ln -s $PATH_FRAG/bin/java /usr/bin/java \
 	&& ln -s $PATH_FRAG/bin/javac /usr/bin/javac \
@@ -40,9 +41,9 @@ RUN echo install-graalvm && set -e \
 RUN echo install-mvn && set -e \
 	&& mkdir /opt/maven \
         && cd /opt/maven \
-        && echo pull-mvn-bin && aria2c --max-connection-per-server=10 --min-split-size=1M --max-concurrent-downloads=10 https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz \
-        && echo unpack-mvn-bin && tar -zxvf apache-maven-3.9.11-bin.tar.gz \
-        && rm -rf apache-maven-3.9.11-bin.tar.gz \
+        && echo pull-mvn-bin && aria2c -x 10 -k 1M -j 10 -o apache-maven.tar.gz https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz \
+        && echo unpack-mvn-bin && tar -zxvf apache-maven.tar.gz \
+        && rm -rf apache-maven.tar.gz \
         && ln -s $(pwd)/$(ls -A .)/bin/mvn /usr/bin/mvn
 
 # uv

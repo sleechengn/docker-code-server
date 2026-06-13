@@ -17,7 +17,7 @@ sed -i '/^#APT-PLACE-HOLDER.*/i\RUN apt update' Dockerfile
 
 # local source optional
 echo "检测本地apt"
-if [ -e "/mnt/rfs/soft/scripts/apt-download/debs/debian/13/a-local-src.list" ]; then
+if [ "$(arch)" == "x86_64" ] && [ -e "/mnt/rfs/soft/scripts/apt-download/debs/debian/13/a-local-src.list" ]; then
     mkdir -p apt-sources
     mount -o bind /mnt/rfs/soft/scripts/apt-download/debs/debian/13 apt-sources
     echo "替换RUN指令"
@@ -27,7 +27,7 @@ if [ -e "/mnt/rfs/soft/scripts/apt-download/debs/debian/13/a-local-src.list" ]; 
 fi
 
 echo "检测本地code-server源"
-if [ -e "/mnt/rfs/soft/sdn/vscode/code-server/4.23.1/code-server-4.23.1-linux-amd64.tar.gz" ]; then
+if [ "$(arch)" == "x86_64" ] && [ -e "/mnt/rfs/soft/sdn/vscode/code-server/4.23.1/code-server-4.23.1-linux-amd64.tar.gz" ]; then
     mkdir -p code-server-sources
     if [ ! -e "code-server-sources/code-server-4.23.1-linux-amd64.tar.gz" ]; then
         cp /mnt/rfs/soft/sdn/vscode/code-server/4.23.1/code-server-4.23.1-linux-amd64.tar.gz code-server-sources
@@ -39,14 +39,38 @@ if [ -e "/mnt/rfs/soft/sdn/vscode/code-server/4.23.1/code-server-4.23.1-linux-am
 fi
 
 echo "检测本地graalvm"
-if [ -e "/mnt/rfs/soft/sdn/java/graalvm/graalvm-jdk-21_linux-x64_bin.tar.gz" ]; then
+if [ "$(arch)" == "x86_64" ] && [ -e "/mnt/rfs/soft/sdn/java/graalvm/graalvm-jdk-21_linux-x64_bin.tar.gz" ]; then
     mkdir -p graalvm-sources
-    if [ ! -e "graalvm-sources/graalvm-jdk-21_linux-x64_bin.tar.gz" ]; then
-        cp /mnt/rfs/soft/sdn/java/graalvm/graalvm-jdk-21_linux-x64_bin.tar.gz graalvm-sources
+    if [ ! -e "graalvm-sources/graalvm-community-jdk-21.0.1_linux_bin.tar.gz" ]; then
+        cp /mnt/rfs/soft/sdn/java/graalvm/graalvm-jdk-21_linux-x64_bin.tar.gz graalvm-sources/graalvm-community-jdk-21.0.1_linux_bin.tar.gz
     fi
     sed -i "s#^RUN echo install-graalvm #RUN --mount=type=bind,target=/opt/tmp/graalvm,ro,source=graalvm-sources echo graalvm-install #g" Dockerfile
     sed -i "/.*echo fetch-graalvm-tar.*/d" Dockerfile
-    sed -i "s#echo exist graalvm#cp /opt/tmp/graalvm/graalvm-jdk-21_linux-x64_bin.tar.gz graalvm-jdk-21_linux-x64_bin.tar.gz#g" Dockerfile
+    sed -i "s#echo exist graalvm#cp /opt/tmp/graalvm/graalvm-community-jdk-21.0.1_linux_bin.tar.gz graalvm-community-jdk-21.0.1_linux_bin.tar.gz#g" Dockerfile
+fi
+
+echo "检测本地mvn"
+if [ "$(arch)" == "x86_64" ] && [ -e "/mnt/rfs/soft/sdn/java/maven/apache-maven-3.9.10-bin.tar.gz" ]; then
+    mkdir -p mvn-sources
+    if [ ! -e "mvn-sources/apache-maven.tar.gz" ]; then
+        cp /mnt/rfs/soft/sdn/java/maven/apache-maven-3.9.10-bin.tar.gz mvn-sources/apache-maven.tar.gz
+    fi
+    sed -i "s#^RUN echo install-mvn #RUN --mount=type=bind,target=/opt/tmp/maven,ro,source=mvn-sources echo install-mvn #g" Dockerfile
+    sed -i "/.*echo pull-mvn-bin.*/d" Dockerfile
+    sed -i "s#echo unpack-mvn-bin#cp /opt/tmp/maven/apache-maven.tar.gz apache-maven.tar.gz#g" Dockerfile
+fi
+
+echo "检测本地uv"
+#/mnt/rfs/soft/sdn/python/venv/uv/0.6.6/uv-x86_64-unknown-linux-gnu.tar.gz
+if [ "$(arch)" == "x86_64" ] && [ -e "/mnt/rfs/soft/sdn/python/venv/uv/0.6.6/uv-x86_64-unknown-linux-gnu.tar.gz" ]; then
+    mkdir -p uv-sources
+    if [ ! -e "uv-sources/uv.tar.gz" ]; then
+        cp /mnt/rfs/soft/sdn/python/venv/uv/0.6.6/uv-x86_64-unknown-linux-gnu.tar.gz uv-sources/uv.tar.gz
+    fi
+    sed -i "s#^RUN echo install-uv #RUN --mount=type=bind,target=/opt/tmp/uv,ro,source=uv-sources echo install-uv #g" Dockerfile
+    sed -i "/.*echo fetch-uv-url.*/d" Dockerfile
+    sed -i "/.*echo fetch-uv-bin.*/d" Dockerfile
+    sed -i "s#echo unpack-uv-bin#cp /opt/tmp/uv/uv.tar.gz uv.tar.gz#g" Dockerfile
 fi
 
 docker --debug build . -f Dockerfile -t 192.168.13.73:5000/sleechengn/code-server:latest
