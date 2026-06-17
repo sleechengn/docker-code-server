@@ -1,4 +1,3 @@
-ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.1/graalvm-community-jdk-21.0.1_linux-aarch64_bin.tar.gz
 FROM debian:trixie
 
 #APT-PLACE-HOLDER
@@ -13,16 +12,21 @@ RUN echo apt-install && set -e \
         && apt autoclean \
         && apt autopurge
 
+#
+ARG CODE_SERVER_DL=https://github.com/coder/code-server/releases/download/v4.124.2/code-server-4.124.2-linux-amd64.tar.gz
+
 #install code-server online
 RUN echo code-server-install && set -e \
 	&& mkdir -p /opt/code-server \
 	&& cd /opt/code-server \
-	&& echo fetch-code-server-url && DOWNLOAD=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4) \
+	&& echo fetch-code-server-url && DOWNLOAD="$CODE_SERVER_DL" \
 	&& echo fetch-code-server-tar && aria2c -x 10 -j 10 -k 1m "$DOWNLOAD" -o "code-server.tar.gz" \
 	&& echo exist code-server-tar && tar -zxvf code-server.tar.gz \
 	&& rm -rf code-server.tar.gz \
 	&& PATH_PART=$(pwd)/$(ls -A .) \
 	&& ln -s $PATH_PART/bin/code-server /usr/bin/code-server
+
+ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.1/graalvm-community-jdk-21.0.1_linux-aarch64_bin.tar.gz
 
 #install graalvm
 RUN echo install-graalvm && set -e \
@@ -41,7 +45,7 @@ RUN echo install-graalvm && set -e \
 RUN echo install-mvn && set -e \
 	&& mkdir /opt/maven \
         && cd /opt/maven \
-        && echo pull-mvn-bin && aria2c -x 10 -k 1M -j 10 -o apache-maven.tar.gz https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz \
+        && echo pull-mvn-bin && aria2c -x 10 -k 1M -j 10 -o apache-maven.tar.gz https://dlcdn.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz \
         && echo unpack-mvn-bin && tar -zxvf apache-maven.tar.gz \
         && rm -rf apache-maven.tar.gz \
         && ln -s $(pwd)/$(ls -A .)/bin/mvn /usr/bin/mvn
@@ -51,7 +55,7 @@ RUN echo install-uv && set -e \
         && mkdir /opt/uv \
         && cd /opt/uv \
         && echo fetch-uv-url && DOWNLOAD=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm| cut -d'"' -f4) \
-        && echo fetch-uv-bin && aria2c -x 10 -j 10 -k 1M $DOWNLOAD -o uv.tar.gz \
+        && echo fetch-uv-bin && aria2c -x 10 -j 10 -k 1M ${DOWNLOAD:-https://releases.astral.sh/github/uv/releases/download/0.11.21/uv-x86_64-unknown-linux-gnu.tar.gz} -o uv.tar.gz \
         && echo unpack-uv-bin && tar -zxvf uv.tar.gz \
         && rm -rf uv.tar.gz \
 	&& PATH_FRAG=$(pwd)/$(ls -A .) \
@@ -78,14 +82,14 @@ RUN /usr/bin/code-server --install-extension franneck94.vscode-c-cpp-dev-extensi
 run mkdir /opt/filebrowser \
         && cd /opt/filebrowser\
         && DOWNLOAD=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4) \
-        && aria2c -x 10 -j 10 -k 1M $DOWNLOAD -o linux-amd64-filebrowser.tar.gz \
+        && aria2c -x 10 -j 10 -k 1M ${DOWNLOAD:-https://github.com/filebrowser/filebrowser/releases/download/v2.63.14/linux-amd64-filebrowser.tar.gz} -o linux-amd64-filebrowser.tar.gz \
         && tar -zxvf linux-amd64-filebrowser.tar.gz \
         && rm -rf linux-amd64-filebrowser.tar.gz \
         && ln -s $(pwd)/filebrowser /usr/bin/filebrowser
 
 #install chinese support
 RUN echo apt-install && set -e \
-	&& apt install -y language-pack-zh-hans \
+	&& apt install -y locales \
 	&& locale-gen zh_CN.UTF-8
 
 #install scala
@@ -117,7 +121,7 @@ RUN set -e \
 RUN set -e \
 	&& mkdir /opt/trzsz && cd /opt/trzsz \
 	&& DOWNLOAD=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4) \
-	&& aria2c -x 10 -j 10 -k 1m $DOWNLOAD -o bin.tar.gz \
+	&& aria2c -x 10 -j 10 -k 1m ${DOWNLOAD:-https://github.com/trzsz/trzsz-go/releases/download/v1.2.0/trzsz_1.2.0_linux_x86_64.tar.gz} -o bin.tar.gz \
 	&& tar -zxvf bin.tar.gz \
 	&& rm -rf bin.tar.gz \
 	&& BIN_DIR=$(pwd)/$(ls -A .) \
@@ -129,7 +133,7 @@ run set -e \
         && mkdir -p /opt/ttyd \
         && cd /opt/ttyd \
         && DOWNLOAD=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd.x86_64| cut -d'"' -f4) \
-        && aria2c -x 10 -j 10 -k 1m $DOWNLOAD -o ttyd.x86_64 \
+        && aria2c -x 10 -j 10 -k 1m ${DOWNLOAD:-https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64} -o ttyd.x86_64 \
         && chmod +x ttyd.x86_64 \
         && ln -s $(pwd)/ttyd.x86_64 /usr/bin/ttyd.x86_64
 

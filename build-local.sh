@@ -78,7 +78,14 @@ if [ "$(arch)" == "x86_64" ] && [ -e "$UV_LOCAL_TGZ" ]; then
 fi
 
 if [ "$(arch)" == "x86_64" ]; then
+	CODE_SERVER_URL=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4)
+	echo "CODE_SERVER_URL=${CODE_SERVER_URL}"
 	sed -i "s#^ARG GRAALVM_DL=.*#ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz#g" Dockerfile
+	sed -i "s#^ARG CODE_SERVER_DL=.*#ARG CODE_SERVER_DL=${CODE_SERVER_URL:-https://github.com/coder/code-server/releases/download/v4.124.2/code-server-4.124.2-linux-amd64.tar.gz}#g" Dockerfile
+else
+	CODE_SERVER_URL=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep arm64| grep -v rocm| cut -d'"' -f4)
+	sed -i "s#^ARG GRAALVM_DL=.*#ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-aarch64_bin.tar.gz#g" Dockerfile
+        sed -i "s#^ARG CODE_SERVER_DL=.*#ARG CODE_SERVER_DL=${CODE_SERVER_URL}#g" Dockerfile
 fi
 docker --debug build . -f Dockerfile -t 192.168.13.73:5000/sleechengn/code-server:latest
 docker push 192.168.13.73:5000/sleechengn/code-server:latest
