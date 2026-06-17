@@ -77,6 +77,9 @@ if [ "$(arch)" == "x86_64" ] && [ -e "$UV_LOCAL_TGZ" ]; then
     sed -i "s#echo unpack-uv-bin#cp /opt/tmp/uv/uv.tar.gz uv.tar.gz#g" Dockerfile
 fi
 
+if [ "$(arch)" == "x86_64" ]; then
+	sed -i "s#^ARG GRAALVM_DL=.*#ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz#g" Dockerfile
+fi
 docker --debug build . -f Dockerfile -t 192.168.13.73:5000/sleechengn/code-server:latest
 docker push 192.168.13.73:5000/sleechengn/code-server:latest
 umount apt-sources
