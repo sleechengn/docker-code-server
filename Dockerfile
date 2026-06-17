@@ -90,7 +90,7 @@ run mkdir /opt/filebrowser \
 #install chinese support
 RUN echo apt-install && set -e \
 	&& apt install -y locales \
-	&& locale-gen zh_CN.UTF-8
+	&& locale-gen en_US.UTF-8
 
 #install scala
 RUN set -e \
@@ -141,7 +141,7 @@ RUN rm -rf /etc/nginx/sites-enabled/default
 ADD ./NGINX /etc/nginx/sites-enabled/
 COPY ./docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
-RUN sed -i '1a\export LC_ALL=zh_CN.UTF-8' /docker-entrypoint.sh
+RUN sed -i '1a\export LC_ALL=en_US.UTF-8' /docker-entrypoint.sh
 
 CMD ["--bind-addr", "127.0.0.1:8080", "--auth", "none"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
