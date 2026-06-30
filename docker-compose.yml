@@ -1,0 +1,56 @@
+networks:
+  code-server-net:
+  lan13:
+    name: lan13
+    driver: macvlan
+    driver_opts:
+      parent: eth1
+    ipam:
+      config:
+        - subnet: "192.168.13.0/24"
+          gateway: "192.168.13.254"
+  lan12:
+    name: lan12
+    driver: macvlan
+    driver_opts:
+      parent: eth3
+    ipam:
+      config:
+        - subnet: "192.168.12.0/24"
+          gateway: 192.168.12.254
+volumes:
+  code-workspace:
+    name: code-workspace
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./volumes/code-server/workspace
+  code-root:
+    name: code-root
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./volumes/code-server/root
+services:
+  code-server:
+    container_name: "code-server"
+    hostname: "code-server"
+    image: "192.168.13.73:5000/sleechengn/code-server:latest"
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - TZ=Asia/Shanghai
+      #- HF_ENDPOINT=https://hf-mirror.com
+    dns:
+      - 119.29.29.29
+    volumes:
+      - "/mnt:/mnt"
+      - "code-root:/root"
+      - "code-workspace:/workspace"
+    networks:
+      lan13:
+        ipv4_address: 192.168.13.59
+      code-server-net:
