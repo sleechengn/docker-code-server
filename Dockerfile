@@ -139,7 +139,7 @@ ARG TTYD_DL_URL=https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86
 run set -e \
         && mkdir -p /opt/ttyd \
         && cd /opt/ttyd \
-        && DOWNLOAD= \
+        && DOWNLOAD=${TTYD_DL_URL} \
         && aria2c -x 10 -j 10 -k 1m ${DOWNLOAD:-https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64} -o ttyd \
         && chmod +x ttyd \
         && ln -s $(pwd)/ttyd /usr/bin/ttyd
