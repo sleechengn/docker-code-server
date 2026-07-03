@@ -81,7 +81,6 @@ if [ "$(arch)" == "x86_64" ] && [ -e "$UV_LOCAL_TGZ" ]; then
 fi
 
 if [ "$(arch)" == "x86_64" ]; then
-echo 1
 	CODE_SERVER_URL=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4)
     UV_DL_URL=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm|grep -v sha256|grep -v musl| cut -d'"' -f4)
 	sed -i "s#^ARG GRAALVM_DL=.*#ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz#g" Dockerfile
@@ -89,7 +88,7 @@ echo 1
     sed -i "s#^ARG UV_DL_URL=.*#ARG UV_DL_URL=${UV_DL_URL}#g" Dockerfile
     FBS_DL_URL=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4)
     sed -i "s#^ARG FBS_DL_URL=.*#ARG FBS_DL_URL=${FBS_DL_URL:-https://releases.astral.sh/github/uv/releases/download/0.11.26/uv-x86_64-unknown-linux-gnu.tar.gz}#g" Dockerfile
-    NODE_DL_URL=https://unofficial-builds.nodejs.org/download/release/v26.4.0/node-v26.4.0-linux-x64-musl.tar.xz
+    NODE_DL_URL=https://nodejs.org/dist/v22.9.0/node-v22.9.0-linux-x64.tar.xz
     sed -i "s#^ARG NODE_DL_URL=.*#ARG NODE_DL_URL=${NODE_DL_URL}#g" Dockerfile
     TRSZ_DL_URL=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4)
     sed -i "s#^ARG TRSZ_DL_URL=.*#ARG TRSZ_DL_URL=${TRSZ_DL_URL}#g" Dockerfile
@@ -122,7 +121,7 @@ if [ "$(arch)" == "aarch64" ] || [ "$(arch)" == "arm64" ]; then
         echo "FBS_DL_URL=$FBS_DL_URL"
     fi
     sed -i "s#^ARG FBS_DL_URL=.*#ARG FBS_DL_URL=${FBS_DL_URL:-https://github.com/filebrowser/filebrowser/releases/download/v2.63.17/linux-arm64-filebrowser.tar.gz}#g" Dockerfile
-    NODE_DL_URL=https://unofficial-builds.nodejs.org/download/release/v26.4.0/node-v26.4.0-linux-arm64-musl.tar.xz
+    NODE_DL_URL=https://nodejs.org/dist/v22.9.0/node-v22.9.0-linux-arm64.tar.xz
     if [ ! "$NODE_DL_URL" ]; then
         echo "拉取 NODE_DL_URL 地址错误"
         exit 1
