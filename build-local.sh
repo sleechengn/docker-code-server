@@ -98,17 +98,53 @@ echo 1
 fi
 if [ "$(arch)" == "aarch64" ] || [ "$(arch)" == "arm64" ]; then
 	CODE_SERVER_URL=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep arm64| grep -v rocm| cut -d'"' -f4)
-	UV_DL_URL=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep aarch64| grep -v rocm|grep -v sha256|grep -v musl|cut -d'"' -f4)
+	if [ ! "$CODE_SERVER_URL" ]; then
+        echo "拉取 code server 地址错误"
+        exit 1
+    else
+        echo "CODE_SERVER_URL=$CODE_SERVER_URL"
+    fi
+    UV_DL_URL=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep aarch64| grep -v rocm|grep -v sha256|grep -v musl|cut -d'"' -f4)
+    if [ ! "$UV_DL_URL" ]; then
+        echo "拉取 UV_DL_URL 地址错误"
+        exit 1
+    else
+        echo "UV_DL_URL=$UV_DL_URL"
+    fi
     sed -i "s#^ARG GRAALVM_DL=.*#ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-aarch64_bin.tar.gz#g" Dockerfile
     sed -i "s#^ARG CODE_SERVER_DL=.*#ARG CODE_SERVER_DL=${CODE_SERVER_URL}#g" Dockerfile
     sed -i "s#^ARG UV_DL_URL=.*#ARG UV_DL_URL=${UV_DL_URL:-https://releases.astral.sh/github/uv/releases/download/0.11.26/uv-aarch64-unknown-linux-gnu.tar.gz}#g" Dockerfile
     FBS_DL_URL=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep browser_download_url |grep linux|grep arm64| grep -v rocm| cut -d'"' -f4)
+    if [ ! "$FBS_DL_URL" ]; then
+        echo "拉取 FBS_DL_URL 地址错误"
+        exit 1
+    else
+        echo "FBS_DL_URL=$FBS_DL_URL"
+    fi
     sed -i "s#^ARG FBS_DL_URL=.*#ARG FBS_DL_URL=${FBS_DL_URL:-https://github.com/filebrowser/filebrowser/releases/download/v2.63.17/linux-arm64-filebrowser.tar.gz}#g" Dockerfile
     NODE_DL_URL=https://unofficial-builds.nodejs.org/download/release/v26.4.0/node-v26.4.0-linux-arm64-musl.tar.xz
+    if [ ! "$NODE_DL_URL" ]; then
+        echo "拉取 NODE_DL_URL 地址错误"
+        exit 1
+    else
+        echo "NODE_DL_URL=$NODE_DL_URL"
+    fi
     sed -i "s#^ARG NODE_DL_URL=.*#ARG NODE_DL_URL=${NODE_DL_URL}#g" Dockerfile
     TRSZ_DL_URL=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_aarch64|grep tar| cut -d'"' -f4)
+    if [ ! "$TRSZ_DL_URL" ]; then
+        echo "拉取 TRSZ_DL_URL 地址错误"
+        exit 1
+    else
+        echo "TRSZ_DL_URL=$TRSZ_DL_URL"
+    fi
     sed -i "s#^ARG TRSZ_DL_URL=.*#ARG TRSZ_DL_URL=${TRSZ_DL_URL}#g" Dockerfile
     TTYD_DL_URL=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd.aarch64| cut -d'"' -f4)
+    if [ ! "$TTYD_DL_URL" ]; then
+        echo "拉取 TTYD_DL_URL 地址错误"
+        exit 1
+    else
+        echo "TTYD_DL_URL=$TTYD_DL_URL"
+    fi
     sed -i "s#^ARG TTYD_DL_URL=.*#ARG TTYD_DL_URL=${TTYD_DL_URL}#g" Dockerfile
 fi
 docker --debug build . -f Dockerfile -t 192.168.13.73:5000/sleechengn/code-server-$(arch):latest
