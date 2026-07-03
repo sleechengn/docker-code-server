@@ -50,11 +50,13 @@ RUN echo install-mvn && set -e \
         && rm -rf apache-maven.tar.gz \
         && ln -s $(pwd)/$(ls -A .)/bin/mvn /usr/bin/mvn
 
+ARG UV_DL_URL=https://releases.astral.sh/github/uv/releases/download/0.11.21/uv-x86_64-unknown-linux-gnu.tar.gz
+
 # uv
 RUN echo install-uv && set -e \
         && mkdir /opt/uv \
         && cd /opt/uv \
-        && echo fetch-uv-url && DOWNLOAD=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm| cut -d'"' -f4) \
+        && echo fetch-uv-url && DOWNLOAD=${UV_DL_URL} \
         && echo fetch-uv-bin && aria2c -x 10 -j 10 -k 1M ${DOWNLOAD:-https://releases.astral.sh/github/uv/releases/download/0.11.21/uv-x86_64-unknown-linux-gnu.tar.gz} -o uv.tar.gz \
         && echo unpack-uv-bin && tar -zxvf uv.tar.gz \
         && rm -rf uv.tar.gz \
@@ -78,13 +80,15 @@ RUN /usr/bin/code-server --install-extension dsznajder.es7-react-js-snippets
 # C C++
 RUN /usr/bin/code-server --install-extension franneck94.vscode-c-cpp-dev-extension-pack
 
+ARG FBS_DL_URL=https://github.com/filebrowser/filebrowser/releases/download/v2.63.14/linux-amd64-filebrowser.tar.gz
+
 # filebrowser
 run mkdir /opt/filebrowser \
         && cd /opt/filebrowser\
-        && DOWNLOAD=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4) \
-        && aria2c -x 10 -j 10 -k 1M ${DOWNLOAD:-https://github.com/filebrowser/filebrowser/releases/download/v2.63.14/linux-amd64-filebrowser.tar.gz} -o linux-amd64-filebrowser.tar.gz \
-        && tar -zxvf linux-amd64-filebrowser.tar.gz \
-        && rm -rf linux-amd64-filebrowser.tar.gz \
+        && DOWNLOAD=${FBS_DL_URL} \
+        && aria2c -x 10 -j 10 -k 1M ${DOWNLOAD:-https://github.com/filebrowser/filebrowser/releases/download/v2.63.14/linux-amd64-filebrowser.tar.gz} -o linux-filebrowser.tar.gz \
+        && tar -zxvf linux-filebrowser.tar.gz \
+        && rm -rf linux-filebrowser.tar.gz \
         && ln -s $(pwd)/filebrowser /usr/bin/filebrowser
 
 #install scala
@@ -98,24 +102,29 @@ RUN set -e \
         && ln -s $PATH_FRAG/bin/scala /usr/bin/scala \
         && ln -s $PATH_FRAG/bin/scalac /usr/bin/scalac
 
+ARG NODE_DL_URL=https://nodejs.org/dist/v24.7.0/node-v24.7.0-linux-x64.tar.xz
+
 # nodejs
 RUN set -e \
 	&& mkdir /opt/nodejs \
 	&& cd /opt/nodejs \
-	&& aria2c -x 10 -j 10 -k 1m https://nodejs.org/dist/v24.7.0/node-v24.7.0-linux-x64.tar.xz \
-	&& xz -d node-v24.7.0-linux-x64.tar.xz \
-	&& rm -rf node-v24.7.0-linux-x64.tar.xz \
-	&& tar -xvf node-v24.7.0-linux-x64.tar \
-	&& rm -rf node-v24.7.0-linux-x64.tar \
+	&& aria2c -x 10 -j 10 -k 1m ${NODE_DL_URL} -o linux-node.tar.xz \
+	&& xz -d linux-node.tar.xz \
+	&& rm -rf linux-node.tar.xz \
+	&& TAR_FILE=$(ls -A .) \
+	&& tar -xvf $TAR_FILE \
+	&& rm -rf $TAR_FILE \
 	&& PATH_PRE=$(pwd)/$(ls -A .) \
 	&& ln -s $PATH_PRE/bin/node /usr/bin/node \
 	&& ln -s $PATH_PRE/bin/npm /usr/bin/npm \
 	&& ln -s $PATH_PRE/bin/npx /usr/bin/npx
 
+ARG TRSZ_DL_URL=https://github.com/trzsz/trzsz-go/releases/download/v1.2.0/trzsz_1.2.0_linux_x86_64.tar.gz
+
 # trzsz
 RUN set -e \
 	&& mkdir /opt/trzsz && cd /opt/trzsz \
-	&& DOWNLOAD=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4) \
+	&& DOWNLOAD=${TRSZ_DL_URL} \
 	&& aria2c -x 10 -j 10 -k 1m ${DOWNLOAD:-https://github.com/trzsz/trzsz-go/releases/download/v1.2.0/trzsz_1.2.0_linux_x86_64.tar.gz} -o bin.tar.gz \
 	&& tar -zxvf bin.tar.gz \
 	&& rm -rf bin.tar.gz \
@@ -123,14 +132,17 @@ RUN set -e \
 	&& ln -s $BIN_DIR/trzsz /usr/bin/trzsz \
 	&& ln -s $BIN_DIR/trz /usr/bin/trz \
 	&& ln -s $BIN_DIR/tsz /usr/bin/tsz
+
+ARG TTYD_DL_URL=https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64
+
 # ttyd
 run set -e \
         && mkdir -p /opt/ttyd \
         && cd /opt/ttyd \
-        && DOWNLOAD=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd.x86_64| cut -d'"' -f4) \
-        && aria2c -x 10 -j 10 -k 1m ${DOWNLOAD:-https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64} -o ttyd.x86_64 \
-        && chmod +x ttyd.x86_64 \
-        && ln -s $(pwd)/ttyd.x86_64 /usr/bin/ttyd.x86_64
+        && DOWNLOAD= \
+        && aria2c -x 10 -j 10 -k 1m ${DOWNLOAD:-https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64} -o ttyd \
+        && chmod +x ttyd \
+        && ln -s $(pwd)/ttyd /usr/bin/ttyd
 
 RUN rm -rf /etc/nginx/sites-enabled/default
 ADD ./NGINX /etc/nginx/sites-enabled/

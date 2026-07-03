@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
+set -e
+
 mkdir -p /opt/tmp
 rm -rf /opt/tmp/code-server-build
 cp -ra . /opt/tmp/code-server-build
 cd /opt/tmp/code-server-build
 rm -rf .git
 
-sed -i 's,FROM debian\:trixie,FROM 192.168.13.73:5000/debian:trixie,g' Dockerfile
-
+if [ $(arch) == "x86_64" ]; then
+    sed -i 's,FROM debian\:trixie,FROM 192.168.13.73:5000/debian:trixie,g' Dockerfile
+fi
 sed -i '1i\# syntax=docker/dockerfile:1.3' Dockerfile
 
 sed -i "/^#APT-PLACE-HOLDER.*/i\RUN apt update" Dockerfile
@@ -78,15 +81,36 @@ if [ "$(arch)" == "x86_64" ] && [ -e "$UV_LOCAL_TGZ" ]; then
 fi
 
 if [ "$(arch)" == "x86_64" ]; then
+echo 1
 	CODE_SERVER_URL=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4)
-	echo "CODE_SERVER_URL=${CODE_SERVER_URL}"
+    UV_DL_URL=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm|grep -v sha256|grep -v musl| cut -d'"' -f4)
 	sed -i "s#^ARG GRAALVM_DL=.*#ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz#g" Dockerfile
 	sed -i "s#^ARG CODE_SERVER_DL=.*#ARG CODE_SERVER_DL=${CODE_SERVER_URL:-https://github.com/coder/code-server/releases/download/v4.124.2/code-server-4.124.2-linux-amd64.tar.gz}#g" Dockerfile
-else
-	CODE_SERVER_URL=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep arm64| grep -v rocm| cut -d'"' -f4)
-	sed -i "s#^ARG GRAALVM_DL=.*#ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-aarch64_bin.tar.gz#g" Dockerfile
-        sed -i "s#^ARG CODE_SERVER_DL=.*#ARG CODE_SERVER_DL=${CODE_SERVER_URL}#g" Dockerfile
+    sed -i "s#^ARG UV_DL_URL=.*#ARG UV_DL_URL=${UV_DL_URL}#g" Dockerfile
+    FBS_DL_URL=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4)
+    sed -i "s#^ARG FBS_DL_URL=.*#ARG FBS_DL_URL=${FBS_DL_URL:-https://releases.astral.sh/github/uv/releases/download/0.11.26/uv-x86_64-unknown-linux-gnu.tar.gz}#g" Dockerfile
+    NODE_DL_URL=https://unofficial-builds.nodejs.org/download/release/v26.4.0/node-v26.4.0-linux-x64-musl.tar.xz
+    sed -i "s#^ARG NODE_DL_URL=.*#ARG NODE_DL_URL=${NODE_DL_URL}#g" Dockerfile
+    TRSZ_DL_URL=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4)
+    sed -i "s#^ARG TRSZ_DL_URL=.*#ARG TRSZ_DL_URL=${TRSZ_DL_URL}#g" Dockerfile
+    TTYD_DL_URL=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd.x86_64| cut -d'"' -f4)
+    sed -i "s#^ARG TTYD_DL_URL=.*#ARG TTYD_DL_URL=${TTYD_DL_URL}#g" Dockerfile
 fi
-docker --debug build . -f Dockerfile -t 192.168.13.73:5000/sleechengn/code-server:latest
-docker push 192.168.13.73:5000/sleechengn/code-server:latest
+if [ "$(arch)" == "aarch64" ] || [ "$(arch)" == "arm64" ]; then
+	CODE_SERVER_URL=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep arm64| grep -v rocm| cut -d'"' -f4)
+	UV_DL_URL=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep aarch64| grep -v rocm|grep -v sha256|grep -v musl|cut -d'"' -f4)
+    sed -i "s#^ARG GRAALVM_DL=.*#ARG GRAALVM_DL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-aarch64_bin.tar.gz#g" Dockerfile
+    sed -i "s#^ARG CODE_SERVER_DL=.*#ARG CODE_SERVER_DL=${CODE_SERVER_URL}#g" Dockerfile
+    sed -i "s#^ARG UV_DL_URL=.*#ARG UV_DL_URL=${UV_DL_URL:-https://releases.astral.sh/github/uv/releases/download/0.11.26/uv-aarch64-unknown-linux-gnu.tar.gz}#g" Dockerfile
+    FBS_DL_URL=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep browser_download_url |grep linux|grep arm64| grep -v rocm| cut -d'"' -f4)
+    sed -i "s#^ARG FBS_DL_URL=.*#ARG FBS_DL_URL=${FBS_DL_URL:-https://github.com/filebrowser/filebrowser/releases/download/v2.63.17/linux-arm64-filebrowser.tar.gz}#g" Dockerfile
+    NODE_DL_URL=https://unofficial-builds.nodejs.org/download/release/v26.4.0/node-v26.4.0-linux-arm64-musl.tar.xz
+    sed -i "s#^ARG NODE_DL_URL=.*#ARG NODE_DL_URL=${NODE_DL_URL}#g" Dockerfile
+    TRSZ_DL_URL=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_aarch64|grep tar| cut -d'"' -f4)
+    sed -i "s#^ARG TRSZ_DL_URL=.*#ARG TRSZ_DL_URL=${TRSZ_DL_URL}#g" Dockerfile
+    TTYD_DL_URL=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd.aarch64| cut -d'"' -f4)
+    sed -i "s#^ARG TTYD_DL_URL=.*#ARG TTYD_DL_URL=${TTYD_DL_URL}#g" Dockerfile
+fi
+docker --debug build . -f Dockerfile -t 192.168.13.73:5000/sleechengn/code-server-$(arch):latest
+docker push 192.168.13.73:5000/sleechengn/code-server-$(arch):latest
 umount apt-sources
