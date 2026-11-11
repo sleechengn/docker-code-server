@@ -8,7 +8,7 @@ cd /opt/tmp/code-server-build
 rm -rf .git
 
 if [ $(arch) == "x86_64" ]; then
-    sed -i 's,FROM debian\:trixie,FROM 192.168.13.73:5000/debian:trixie,g' Dockerfile
+    sed -i 's,FROM debian\:trixie,FROM 192.168.13.73:5000/debian-x86_64:trixie,g' Dockerfile
 fi
 sed -i '1i\# syntax=docker/dockerfile:1.3' Dockerfile
 
