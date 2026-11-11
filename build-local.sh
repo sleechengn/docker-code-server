@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -e
+
+set -ex
 
 mkdir -p /opt/tmp
 rm -rf /opt/tmp/code-server-build

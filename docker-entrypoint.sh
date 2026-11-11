@@ -1,4 +1,7 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
+
+set -ex
+
 nohup nginx > /dev/null &
 nohup filebrowser -d /opt/filebrowser/filebrowser.db -a 127.0.0.1 -p 8081 -b /filebrowser -r / --noauth > /dev/null &
 nohup ttyd --port 8082 --base-path /ttyd --writable -t enableZmodem=true -t enableTrzsz=true /usr/bin/fish > /dev/null &
