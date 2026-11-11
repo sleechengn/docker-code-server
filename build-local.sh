@@ -4,7 +4,7 @@ set -ex
 
 mkdir -p /opt/tmp
 rm -rf /opt/tmp/code-server-build
-cp -ra . /opt/tmp/code-server-build
+cp -ra $(dirname $0) /opt/tmp/code-server-build
 cd /opt/tmp/code-server-build
 rm -rf .git
 
