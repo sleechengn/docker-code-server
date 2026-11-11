@@ -20,9 +20,9 @@ sed -i '/^#APT-PLACE-HOLDER.*/i\RUN apt update' Dockerfile
 
 # local source optional
 echo "detect apt"
-if [ "$(arch)" == "x86_64" ] && [ -e "/mnt/vol2/soft/scripts/apt-download/debs/debian/13/a-local-src.list" ]; then
+if [ "$(arch)" == "x86_64" ] && [ -e "/mnt/ext/soft/scripts/apt-download/debs/debian/13/a-local-src.list" ]; then
     mkdir -p apt-sources
-    mount -o bind /mnt/vol2/soft/scripts/apt-download/debs/debian/13 apt-sources
+    mount -o bind /mnt/ext/soft/scripts/apt-download/debs/debian/13 apt-sources
     echo "replace RUN instruction"
     sed -i "s#^RUN echo apt-install #RUN --mount=type=bind,target=/mnt/vol2/soft/scripts/apt-download/debs/debian/13,ro,source=apt-sources echo apt-install #g" Dockerfile
     sed -i '/^#APT-PLACE-HOLDER.*/i\RUN --mount=type=bind,target=/mnt/vol2/soft/scripts/apt-download/debs/debian/13,ro,source=apt-sources cp /mnt/vol2/soft/scripts/apt-download/debs/debian/13/a-local-src.list /etc/apt/sources.list.d' Dockerfile
