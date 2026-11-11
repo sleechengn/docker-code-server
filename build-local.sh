@@ -85,36 +85,42 @@ if [ "$(arch)" == "x86_64" ]; then
     if [ "$CODE_SERVER_URL" ]; then
         sed -i "s#^ARG CODE_SERVER_DL=.*#ARG CODE_SERVER_DL=${CODE_SERVER_URL:-https://github.com/coder/code-server/releases/download/v4.124.2/code-server-4.124.2-linux-amd64.tar.gz}#g" Dockerfile
     else
+        echo "can not get url of code server"
         exit 1
     fi
     UV_DL_URL=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm|grep -v sha256|grep -v musl| cut -d'"' -f4)
 	if [ "$UV_DL_URL" ]; then
         sed -i "s#^ARG UV_DL_URL=.*#ARG UV_DL_URL=${UV_DL_URL}#g" Dockerfile
     else
+        echo "can not get url of uv"
         exit 1
     fi
     FBS_DL_URL=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4)
     if [ "$FBS_DL_URL" ]; then
         sed -i "s#^ARG FBS_DL_URL=.*#ARG FBS_DL_URL=${FBS_DL_URL:-https://releases.astral.sh/github/uv/releases/download/0.11.26/uv-x86_64-unknown-linux-gnu.tar.gz}#g" Dockerfile
     else
+        echo "can not get url of file browser"
         exit 1
     fi
     NODE_DL_URL=https://nodejs.org/dist/v22.9.0/node-v22.9.0-linux-x64.tar.xz
     if [ "$NODE_DL_URL" ]; then
         sed -i "s#^ARG NODE_DL_URL=.*#ARG NODE_DL_URL=${NODE_DL_URL}#g" Dockerfile
     else
+        echo "can not get url of node"
         exit 1
     fi
     TRSZ_DL_URL=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_x86_64|grep tar| cut -d'"' -f4)
     if [ "$TRSZ_DL_URL" ]; then
         sed -i "s#^ARG TRSZ_DL_URL=.*#ARG TRSZ_DL_URL=${TRSZ_DL_URL}#g" Dockerfile
     else
+        echo "can not get url of trzsz-go"
         exit 1
     fi
     TTYD_DL_URL=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd.x86_64| cut -d'"' -f4)
     if [ "$TTYD_DL_URL" ]; then
         sed -i "s#^ARG TTYD_DL_URL=.*#ARG TTYD_DL_URL=${TTYD_DL_URL}#g" Dockerfile
     else
+        echo "can not get url of ttyd"
         exit 1
     fi
 fi
