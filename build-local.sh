@@ -19,18 +19,18 @@ sed -i '/^#APT-PLACE-HOLDER.*/i\RUN sed -i "s,http://deb.debian.org/,https://mir
 sed -i '/^#APT-PLACE-HOLDER.*/i\RUN apt update' Dockerfile
 
 # local source optional
-echo "检测本地apt"
-if [ "$(arch)" == "x86_64" ] && [ -e "/mnt/rfs/soft/scripts/apt-download/debs/debian/13/a-local-src.list" ]; then
+echo "detect apt"
+if [ "$(arch)" == "x86_64" ] && [ -e "/mnt/vol2/soft/scripts/apt-download/debs/debian/13/a-local-src.list" ]; then
     mkdir -p apt-sources
-    mount -o bind /mnt/rfs/soft/scripts/apt-download/debs/debian/13 apt-sources
-    echo "替换RUN指令"
-    sed -i "s#^RUN echo apt-install #RUN --mount=type=bind,target=/mnt/rfs/soft/scripts/apt-download/debs/debian/13,ro,source=apt-sources echo apt-install #g" Dockerfile
-    sed -i '/^#APT-PLACE-HOLDER.*/i\RUN --mount=type=bind,target=/mnt/rfs/soft/scripts/apt-download/debs/debian/13,ro,source=apt-sources cp /mnt/rfs/soft/scripts/apt-download/debs/debian/13/a-local-src.list /etc/apt/sources.list.d' Dockerfile
-    sed -i '/^#APT-PLACE-HOLDER.*/i\RUN --mount=type=bind,target=/mnt/rfs/soft/scripts/apt-download/debs/debian/13,ro,source=apt-sources apt update' Dockerfile
+    mount -o bind /mnt/vol2/soft/scripts/apt-download/debs/debian/13 apt-sources
+    echo "replace RUN instruction"
+    sed -i "s#^RUN echo apt-install #RUN --mount=type=bind,target=/mnt/vol2/soft/scripts/apt-download/debs/debian/13,ro,source=apt-sources echo apt-install #g" Dockerfile
+    sed -i '/^#APT-PLACE-HOLDER.*/i\RUN --mount=type=bind,target=/mnt/vol2/soft/scripts/apt-download/debs/debian/13,ro,source=apt-sources cp /mnt/vol2/soft/scripts/apt-download/debs/debian/13/a-local-src.list /etc/apt/sources.list.d' Dockerfile
+    sed -i '/^#APT-PLACE-HOLDER.*/i\RUN --mount=type=bind,target=/mnt/vol2/soft/scripts/apt-download/debs/debian/13,ro,source=apt-sources apt update' Dockerfile
 fi
 
-CODE_SERVER_LOCAL_TAR_GZ="/mnt/rfs/soft/sdn/vscode/code-server/4.23.1/code-server-4.23.1-linux-amd64.tar.gz"
-echo "检测本地code-server源"
+CODE_SERVER_LOCAL_TAR_GZ="/mnt/vol2/soft/sdn/vscode/code-server/4.23.1/code-server-4.23.1-linux-amd64.tar.gz"
+echo "detect code-server source"
 if [ "$(arch)" == "x86_64" ] && [ -e "$CODE_SERVER_LOCAL_TAR_GZ" ]; then
     mkdir -p code-server-sources
     if [ ! -e "code-server-sources/code-server.tar.gz" ]; then
@@ -42,8 +42,8 @@ if [ "$(arch)" == "x86_64" ] && [ -e "$CODE_SERVER_LOCAL_TAR_GZ" ]; then
     sed -i "s#echo exist code-server-tar#cp /opt/tmp/code-server/code-server.tar.gz code-server.tar.gz#g" Dockerfile
 fi
 
-GRAALVM_LOCAL_TAR_GZ="/mnt/rfs/soft/sdn/java/graalvm/graalvm-jdk-21_linux-x64_bin.tar.gz"
-echo "检测本地graalvm"
+GRAALVM_LOCAL_TAR_GZ="/mnt/vol2/soft/sdn/java/graalvm/graalvm-jdk-21_linux-x64_bin.tar.gz"
+echo "detect graalvm"
 if [ "$(arch)" == "x86_64" ] && [ -e "$GRAALVM_LOCAL_TAR_GZ" ]; then
     mkdir -p graalvm-sources
     if [ ! -e "graalvm-sources/graalvm-community-jdk-21.0.1_linux_bin.tar.gz" ]; then
@@ -54,8 +54,8 @@ if [ "$(arch)" == "x86_64" ] && [ -e "$GRAALVM_LOCAL_TAR_GZ" ]; then
     sed -i "s#echo exist graalvm#cp /opt/tmp/graalvm/graalvm-community-jdk-21.0.1_linux_bin.tar.gz graalvm-community-jdk-21.0.1_linux_bin.tar.gz#g" Dockerfile
 fi
 
-MAVEN_LOCAL_TAR_GZ="/mnt/rfs/soft/sdn/java/maven/apache-maven-3.9.10-bin.tar.gz"
-echo "检测本地mvn"
+MAVEN_LOCAL_TAR_GZ="/mnt/vol2/soft/sdn/java/maven/apache-maven-3.9.10-bin.tar.gz"
+echo "detect mvn"
 if [ "$(arch)" == "x86_64" ] && [ -e "$MAVEN_LOCAL_TAR_GZ" ]; then
     mkdir -p mvn-sources
     if [ ! -e "mvn-sources/apache-maven.tar.gz" ]; then
@@ -66,9 +66,9 @@ if [ "$(arch)" == "x86_64" ] && [ -e "$MAVEN_LOCAL_TAR_GZ" ]; then
     sed -i "s#echo unpack-mvn-bin#cp /opt/tmp/maven/apache-maven.tar.gz apache-maven.tar.gz#g" Dockerfile
 fi
 
-UV_LOCAL_TGZ="/mnt/rfs/soft/sdn/python/venv/uv/0.6.6/uv-x86_64-unknown-linux-gnu.tar.gz"
-echo "检测本地uv"
-#/mnt/rfs/soft/sdn/python/venv/uv/0.6.6/uv-x86_64-unknown-linux-gnu.tar.gz
+UV_LOCAL_TGZ="/mnt/vol2/soft/sdn/python/venv/uv/0.6.6/uv-x86_64-unknown-linux-gnu.tar.gz"
+echo "detect uv"
+#/mnt/vol2/soft/sdn/python/venv/uv/0.6.6/uv-x86_64-unknown-linux-gnu.tar.gz
 if [ "$(arch)" == "x86_64" ] && [ -e "$UV_LOCAL_TGZ" ]; then
     mkdir -p uv-sources
     if [ ! -e "uv-sources/uv.tar.gz" ]; then
@@ -98,14 +98,14 @@ fi
 if [ "$(arch)" == "aarch64" ] || [ "$(arch)" == "arm64" ]; then
 	CODE_SERVER_URL=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep arm64| grep -v rocm| cut -d'"' -f4)
 	if [ ! "$CODE_SERVER_URL" ]; then
-        echo "拉取 code server 地址错误"
+        echo "pull code server error"
         exit 1
     else
         echo "CODE_SERVER_URL=$CODE_SERVER_URL"
     fi
     UV_DL_URL=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep aarch64| grep -v rocm|grep -v sha256|grep -v musl|cut -d'"' -f4)
     if [ ! "$UV_DL_URL" ]; then
-        echo "拉取 UV_DL_URL 地址错误"
+        echo "pull UV_DL_URL error"
         exit 1
     else
         echo "UV_DL_URL=$UV_DL_URL"
@@ -115,7 +115,7 @@ if [ "$(arch)" == "aarch64" ] || [ "$(arch)" == "arm64" ]; then
     sed -i "s#^ARG UV_DL_URL=.*#ARG UV_DL_URL=${UV_DL_URL:-https://releases.astral.sh/github/uv/releases/download/0.11.26/uv-aarch64-unknown-linux-gnu.tar.gz}#g" Dockerfile
     FBS_DL_URL=$(curl -s https://api.github.com/repos/filebrowser/filebrowser/releases/latest | grep browser_download_url |grep linux|grep arm64| grep -v rocm| cut -d'"' -f4)
     if [ ! "$FBS_DL_URL" ]; then
-        echo "拉取 FBS_DL_URL 地址错误"
+        echo "pull FBS_DL_URL error"
         exit 1
     else
         echo "FBS_DL_URL=$FBS_DL_URL"
@@ -123,7 +123,7 @@ if [ "$(arch)" == "aarch64" ] || [ "$(arch)" == "arm64" ]; then
     sed -i "s#^ARG FBS_DL_URL=.*#ARG FBS_DL_URL=${FBS_DL_URL:-https://github.com/filebrowser/filebrowser/releases/download/v2.63.17/linux-arm64-filebrowser.tar.gz}#g" Dockerfile
     NODE_DL_URL=https://nodejs.org/dist/v22.9.0/node-v22.9.0-linux-arm64.tar.xz
     if [ ! "$NODE_DL_URL" ]; then
-        echo "拉取 NODE_DL_URL 地址错误"
+        echo "pull NODE_DL_URL error"
         exit 1
     else
         echo "NODE_DL_URL=$NODE_DL_URL"
@@ -131,7 +131,7 @@ if [ "$(arch)" == "aarch64" ] || [ "$(arch)" == "arm64" ]; then
     sed -i "s#^ARG NODE_DL_URL=.*#ARG NODE_DL_URL=${NODE_DL_URL}#g" Dockerfile
     TRSZ_DL_URL=$(curl -s https://api.github.com/repos/trzsz/trzsz-go/releases/latest | grep browser_download_url |grep linux_aarch64|grep tar| cut -d'"' -f4)
     if [ ! "$TRSZ_DL_URL" ]; then
-        echo "拉取 TRSZ_DL_URL 地址错误"
+        echo "pull TRSZ_DL_URL error"
         exit 1
     else
         echo "TRSZ_DL_URL=$TRSZ_DL_URL"
@@ -139,7 +139,7 @@ if [ "$(arch)" == "aarch64" ] || [ "$(arch)" == "arm64" ]; then
     sed -i "s#^ARG TRSZ_DL_URL=.*#ARG TRSZ_DL_URL=${TRSZ_DL_URL}#g" Dockerfile
     TTYD_DL_URL=$(curl -s https://api.github.com/repos/tsl0922/ttyd/releases/latest | grep browser_download_url |grep ttyd.aarch64| cut -d'"' -f4)
     if [ ! "$TTYD_DL_URL" ]; then
-        echo "拉取 TTYD_DL_URL 地址错误"
+        echo "pull TTYD_DL_URL error"
         exit 1
     else
         echo "TTYD_DL_URL=$TTYD_DL_URL"
