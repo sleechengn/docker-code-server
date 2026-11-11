@@ -84,6 +84,8 @@ if [ "$(arch)" == "x86_64" ]; then
     CODE_SERVER_URL=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | grep browser_download_url |grep linux|grep amd64| grep -v rocm| cut -d'"' -f4)
     if [ "$CODE_SERVER_URL" ]; then
         sed -i "s#^ARG CODE_SERVER_DL=.*#ARG CODE_SERVER_DL=${CODE_SERVER_URL:-https://github.com/coder/code-server/releases/download/v4.124.2/code-server-4.124.2-linux-amd64.tar.gz}#g" Dockerfile
+    else
+        exit 1
     fi
     UV_DL_URL=$(curl -s https://api.github.com/repos/astral-sh/uv/releases/latest | grep browser_download_url |grep linux|grep x86_64| grep -v rocm|grep -v sha256|grep -v musl| cut -d'"' -f4)
 	if [ "$UV_DL_URL" ]; then
